@@ -1,4 +1,5 @@
 import { User } from "../entities/User.js";
+import bcrypt from "bcrypt"
 
 export class SignUpUser {
   constructor(userRepository) {
@@ -17,7 +18,7 @@ export class SignUpUser {
     password
   ) {
     // Hash Password
-    const passwordHash = password;
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const user = new User(
       null,
