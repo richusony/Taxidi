@@ -5,7 +5,7 @@ export class User {
     secondName,
     email,
     phone,
-    address,
+    city,
     pincode,
     licenseNumber,
     blocked,
@@ -16,7 +16,7 @@ export class User {
     this.secondName = secondName;
     this.email = email;
     this.phone = phone;
-    this.address = address;
+    this.city = city;
     this.pincode = pincode
     this.licenseNumber = licenseNumber;
     this.blocked = blocked;
@@ -28,6 +28,5 @@ export class User {
     if (!this.firstName || !this.email || !this.password) {
       throw new Error("Invalid user data");
     }
-    // Additional validation logic
   }
 }

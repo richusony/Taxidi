@@ -6,12 +6,20 @@ export class SignUpUser {
     this.userRepository = userRepository;
   }
 
-  async execute(
+  // async userExists(email){
+  //     const userExists = this.userRepository.findByEmail(email)
+  //   if(userExists) {
+  //     console.log("exists...")
+  //     return true
+  //   }
+  // }
+
+  async executeUser(
     firstName,
     secondName,
     email,
     phone,
-    address,
+    city,
     pincode,
     licenseNumber,
     blocked,
@@ -19,14 +27,13 @@ export class SignUpUser {
   ) {
     // Hash Password
     const passwordHash = await bcrypt.hash(password, 10);
-
     const user = new User(
       null,
       firstName,
       secondName,
       email,
       phone,
-      address,
+      city,
       pincode,
       licenseNumber,
       blocked,
@@ -39,4 +46,5 @@ export class SignUpUser {
     // Save the user
     return this.userRepository.save(user);
   }
+
 }

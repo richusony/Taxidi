@@ -10,19 +10,17 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     phone: {
         type: Number,
-        required: true
     },
-    address: {
+    city: {
         type: String,
-        required: true
     },
     pincode: {
-        type: Number,
-        required: true
+        type: Number
     },
     licenseNumber: {
         type: String,
@@ -33,7 +31,6 @@ const userSchema = new mongoose.Schema({
     },
     blocked: {
         type: String,
-        required: true
     },
 })
 

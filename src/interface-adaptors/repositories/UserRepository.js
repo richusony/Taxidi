@@ -7,7 +7,7 @@ export class UserRepository {
       secondName: user.secondName,
       email: user.email,
       phone: user.phone,
-      address: user.address,
+      city: user.city,
       pincode: user.pincode,
       licenseNumber: user.licenseNumber,
       blocked: user.blocked,

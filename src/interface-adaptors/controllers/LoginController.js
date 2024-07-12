@@ -5,15 +5,35 @@ const userRepository = new UserRepository();
 const loginUser = new LoginUser(userRepository);
 
 class LoginController {
-    async login(req, res){
-        const { email, password } = req.body;
-        try {
-            const { user, token } = await loginUser.execute(email,password);
-            res.status(200).json({user, token});
-        } catch (error) {
-            res.status(400).json({error: error.message});
-        }
+  async login(req, res) {
+    const { email, password, googleLogin } = req.body;
+    try {
+      // const passwordCorrect = await loginUser.checkPassword(password)
+      // if(passwordCorrect == "User doesn't exists") {
+      //   res.status(404).json({err: passwordCorrect})
+      //   return;
+      // } else if(passwordCorrect == "Invalid Password"){
+      //   res.status(400).json({err: passwordCorrect})
+      //   return;
+      // }
+      const { user, token } = await loginUser.execute(
+        email,
+        password,
+        googleLogin
+      );
+
+      const cookieOptions = {
+        httpOnly: true, // safety, does not allow cookie to be read in the frontend javascript
+        maxAge: 60 * 60 * 1000, // cookie age in seconds
+        sameSite: "Lax", // works for local development
+      };
+
+      res.cookie("jwt", token, cookieOptions);
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
     }
+  }
 }
 
 export default LoginController;
