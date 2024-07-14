@@ -19,6 +19,28 @@ export class UserRepository {
   }
 
   async findByEmail(email) {
-    return UserModel.findOne({ email });
+    return await UserModel.findOne({ email });
+  }
+
+  async update(user) {
+    const userExist = await this.findByEmail(user.email);
+    if (!userExist) {
+      console.log("user not found while updating");
+      return false;
+    }
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { _id: userExist._id },
+      {
+        firstName: user.firstName,
+        secondName: user.secondName,
+        email: user.email,
+        phone: user.phone,
+        city: user.city,
+        pincode: user.pincode,
+      },
+      { new: true } 
+    );
+
+    return updatedUser;
   }
 }

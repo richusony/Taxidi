@@ -1,5 +1,5 @@
 import { User } from "../entities/User.js";
-import bcrypt from "bcrypt"
+import { passwordHashing } from "../frameworks-and-drivers/external-lib/passwordHashing.js";
 
 export class SignUpUser {
   constructor(userRepository) {
@@ -26,7 +26,7 @@ export class SignUpUser {
     password
   ) {
     // Hash Password
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = passwordHashing(password);
     const user = new User(
       null,
       firstName,
@@ -46,5 +46,4 @@ export class SignUpUser {
     // Save the user
     return this.userRepository.save(user);
   }
-
 }

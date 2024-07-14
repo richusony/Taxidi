@@ -1,6 +1,6 @@
 export class UserController {
-  constructor(signUpUserUseCase) {
-    this.signUpUserUseCase = signUpUserUseCase;
+  constructor(userUseCase) {
+    this.userUseCase = userUseCase;
   }
 
   async signUp(req, res) {
@@ -23,12 +23,12 @@ export class UserController {
     }
 
     try {
-      // const userExists = await this.signUpUserUseCase.userExists(email)
+      // const userExists = await this.userUseCase.userExists(email)
       // if(userExists) {
       //   return res.status(400).json({err: "User already exists"});
       // }
-  
-      const user = await this.signUpUserUseCase.executeUser(
+
+      const user = await this.userUseCase.executeUser(
         firstName,
         secondName,
         email,
@@ -40,6 +40,27 @@ export class UserController {
         password
       );
       res.status(201).json(user);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async update(req, res) {
+    const { firstName, secondName, email, phone, city, pincode } = req.body;
+    console.log("reached update controller", firstName, secondName, email, phone, city, pincode);
+
+    if (!firstName || !email || !pincode) {
+      res.status(400).json({ err: "Enter all required fields - UpdateUser" });
+    }
+
+    try {
+      const updatedUser = await this.userUseCase.update(firstName, secondName, email, phone, city, pincode);
+      if(!updatedUser) {
+        res.status(400).json({err: "Error while updating - UserController"})
+        return;
+      };
+
+      res.status(200).json(updatedUser);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
