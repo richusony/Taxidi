@@ -64,7 +64,6 @@ export const createAndSendOtp = async (email) => {
   await OtpModel.create({ email, otp: hashedOtp });
 
   const send = await sendOtpEmail(email, otp);
-  console.log(send);
 };
 
 export const verifyOtp = async (email, otp) => {

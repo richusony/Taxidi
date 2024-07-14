@@ -6,13 +6,13 @@ export class SignUpUser {
     this.userRepository = userRepository;
   }
 
-  // async userExists(email){
-  //     const userExists = this.userRepository.findByEmail(email)
-  //   if(userExists) {
-  //     console.log("exists...")
-  //     return true
-  //   }
-  // }
+  async userExists(email) {
+    const userExists = await this.userRepository.findByEmail(email);
+    if (userExists) {
+      console.log(userExists);
+      return true;
+    }
+  }
 
   async executeUser(
     firstName,

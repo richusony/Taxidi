@@ -5,7 +5,6 @@ import {
 
 export class OtpController {
   async sendOtp(req, res) {
-    console.log(req.body);
     const { email } = req.body;
     try {
       await createAndSendOtp(email);

@@ -23,10 +23,10 @@ export class UserController {
     }
 
     try {
-      // const userExists = await this.userUseCase.userExists(email)
-      // if(userExists) {
-      //   return res.status(400).json({err: "User already exists"});
-      // }
+      const userExists = await this.userUseCase.userExists(email)
+      if(userExists) {
+        return res.status(400).json({error: "User already exists"});
+      }
 
       const user = await this.userUseCase.executeUser(
         firstName,
