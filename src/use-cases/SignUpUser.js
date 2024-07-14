@@ -26,7 +26,7 @@ export class SignUpUser {
     password
   ) {
     // Hash Password
-    const passwordHash = passwordHashing(password);
+    const passwordHash = await passwordHashing(password);
     const user = new User(
       null,
       firstName,

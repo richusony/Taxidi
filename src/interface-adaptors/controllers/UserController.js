@@ -50,13 +50,13 @@ export class UserController {
     console.log("reached update controller", firstName, secondName, email, phone, city, pincode);
 
     if (!firstName || !email || !pincode) {
-      res.status(400).json({ err: "Enter all required fields - UpdateUser" });
+      res.status(400).json({ error: "Enter all required fields - UpdateUser" });
     }
 
     try {
       const updatedUser = await this.userUseCase.update(firstName, secondName, email, phone, city, pincode);
       if(!updatedUser) {
-        res.status(400).json({err: "Error while updating - UserController"})
+        res.status(400).json({error: "Error while updating - UserController"})
         return;
       };
 
