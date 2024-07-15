@@ -8,4 +8,4 @@ const bodySchema = new mongoose.Schema({
     }
 },{timestamps:true})
 
-export const BodyModel = mongoose.model("Body-types", bodySchema);
+export const BodyModel = mongoose.model("body-types", bodySchema);

@@ -1,5 +1,5 @@
-import { AdminRepository } from "../repositories/AdminRepository.js";
 import LoginAdmin from "../../use-cases/LoginAdmin.js";
+import { AdminRepository } from "../repositories/AdminRepository.js";
 
 const adminRepository = new AdminRepository();
 const loginAdmin = new LoginAdmin(adminRepository);
