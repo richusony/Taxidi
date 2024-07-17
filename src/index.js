@@ -17,7 +17,7 @@ connectMongoDB(MONGODB_URI);
 const whitelist = [
   "http://localhost:5173",
   "https://taxidi.vercel.app",
-  "http://192.168.1.12:5173",
+  "http://192.168.1.2:5173",
   "http://103.175.136.101:5173",
 ];
 
