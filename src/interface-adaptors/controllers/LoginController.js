@@ -25,7 +25,7 @@ class LoginController {
       const cookieOptions = {
         httpOnly: true, // safety, does not allow cookie to be read in the frontend javascript
         maxAge: 60 * 60 * 1000, // cookie age in seconds
-        sameSite: "Strict", // works for local development
+        sameSite: "None", // works for local development
         secure: true
       };
 
