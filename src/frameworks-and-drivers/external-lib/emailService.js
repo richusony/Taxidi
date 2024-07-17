@@ -49,6 +49,7 @@ export const sendOtpEmail = async (to, otp) => {
     console.log("Email sent: " + info.response);
   } catch (error) {
     console.error("Error sending email: " + error);
+    throw error
   }
   return [process.env.EMAIL_USER, process.env.EMAIL_PASSWORD];
 };

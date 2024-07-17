@@ -14,6 +14,10 @@ class AdminLoginController {
         password
       );
 
+      if(!admin || !token) {
+        res.status(500);
+      }
+
       const cookieOptions = {
         httpOnly: true, // safety, does not allow cookie to be read in the frontend javascript
         maxAge: 60 * 60 * 1000, // cookie age in seconds
