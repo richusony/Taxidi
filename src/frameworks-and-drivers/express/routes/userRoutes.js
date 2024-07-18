@@ -20,13 +20,13 @@ const brandRepository = new BrandRepository();
 // Usecases
 const signUpUser = new SignUpUser(userRepository);
 const updateUser = new UpdateUser(userRepository);
-const getAllBrand = new CreateBrand(brandRepository)
+const getAllBrand = new CreateBrand(brandRepository);
 
 // Controllers
 const otpController = new OtpController();
 const loginController = new LoginController();
 const userProfileController = new UserProfileController();
-const brandController = new BrandController(getAllBrand)
+const brandController = new BrandController(getAllBrand);
 
 // Routes
 router.post("/send-otp", (req, res) => otpController.sendOtp(req, res));
@@ -51,11 +51,10 @@ router.post("/update-user", protectRoute, (req, res) => {
 
 router.get("/brands", (req, res) => {
   brandController.getAllBrands(req, res);
-})
+});
 
 router.get("/logout", protectRoute, (req, res) => {
-  res.cookie("jwt", "", { maxAge: 0 }); 
-  res.status(200).json({ message: "Logged out successfully" });
+  loginController.logout(req, res);
 });
 
 export default router;

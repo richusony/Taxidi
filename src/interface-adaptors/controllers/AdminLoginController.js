@@ -7,23 +7,31 @@ const loginAdmin = new LoginAdmin(adminRepository);
 class AdminLoginController {
   async login(req, res) {
     const { email, password } = req.body;
-    console.log(email, password)
+    let cookieOptions;
+    console.log(email, password);
     try {
-      const { admin, token } = await loginAdmin.execute(
-        email,
-        password
-      );
+      const { admin, token } = await loginAdmin.execute(email, password);
 
-      if(!admin || !token) {
+      if (!admin || !token) {
         res.status(500);
       }
 
-      const cookieOptions = {
-        httpOnly: true, // safety, does not allow cookie to be read in the frontend javascript
-        maxAge: 60 * 60 * 1000, // cookie age in seconds
-        sameSite: "None", // works for local development
-        secure: true
-      };
+      if (process.env.NODE_ENV == "development") {
+         cookieOptions = {
+          httpOnly: true, // safety, does not allow cookie to be read in the frontend javascript
+          maxAge: 60 * 60 * 1000, // cookie age in seconds
+          sameSite: "Lax" // works for local development
+        };
+      }
+
+      if( process.env.NODE_ENV == "production") {
+         cookieOptions = {
+          httpOnly: true, // safety, does not allow cookie to be read in the frontend javascript
+          maxAge: 60 * 60 * 1000, // cookie age in seconds
+          sameSite: "None", // works for local development
+          secure: true,
+        };
+      }
 
       res.cookie("jwt", token, cookieOptions);
       res.status(200).json(admin);
@@ -32,14 +40,25 @@ class AdminLoginController {
     }
   }
 
-async logout(req, res){
-    res.cookie('jwt', '', { 
-    httpOnly: true, 
-    expires: new Date(0), // Set the expiration date to the past to clear the cookie
-    sameSite: "Lax",
-  });
-  res.status(200).json({ message: 'Logged out successfully' });
-}
+  async logout(req, res) {
+    if (process.env.NODE_ENV == "development") {
+      res.cookie("jwt", "", {
+        httpOnly: true,
+        expires: new Date(0), // Set the expiration date to the past to clear the cookie
+        sameSite: "Lax",
+      });
+    }
+
+    if (process.env.NODE_ENV == "production") {
+      res.cookie("jwt", "", {
+        httpOnly: true,
+        expires: new Date(0), // Set the expiration date to the past to clear the cookie
+        sameSite: "None",
+        secure: true,
+      });
+    }
+    res.status(200).json({ message: "Logged out successfully" });
+  }
 }
 
 export default AdminLoginController;

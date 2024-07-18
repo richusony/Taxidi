@@ -4,6 +4,7 @@ import {UserModel} from "../../database/mongoose/models/UserModel.js";
 const protectRoute = async (req, res, next) => {
   try {
     const token = req.cookies.jwt;
+    console.log(token);
     if (!token) {
       return res.status(401).json({ err: "Unauthorized - No Token Provided" });
     }

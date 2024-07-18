@@ -48,5 +48,5 @@ app.use("/", userRoutes);
 app.use("/admin", adminRoutes);
 
 app.listen(PORT, () => {
-  console.log("listening on port : ", PORT);
+  console.log("listening on port : ", PORT, "ON : ", process.env.NODE_ENV);
 });
