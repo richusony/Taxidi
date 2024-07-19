@@ -23,7 +23,7 @@ export class UserRepository {
   }
 
   async findById(id) {
-    return await UserModel.findById({ id });
+    return await UserModel.findById(id);
   }
 
   async update(user) {
