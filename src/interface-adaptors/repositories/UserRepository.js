@@ -22,8 +22,12 @@ export class UserRepository {
     return await UserModel.findOne({ email });
   }
 
+  async findById(id) {
+    return await UserModel.findById({ id });
+  }
+
   async update(user) {
-    const userExist = await this.findByEmail(user.email);
+    const userExist = await this.findById(user.id);
     if (!userExist) {
       console.log("user not found while updating");
       return false;
@@ -38,7 +42,7 @@ export class UserRepository {
         city: user.city,
         pincode: user.pincode,
       },
-      { new: true } 
+      { new: true }
     );
 
     return updatedUser;

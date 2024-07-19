@@ -46,6 +46,7 @@ export class UserController {
   }
 
   async update(req, res) {
+    const userId = req.user._id;
     const { firstName, secondName, email, phone, city, pincode } = req.body;
     console.log(
       "reached update controller",
@@ -63,6 +64,7 @@ export class UserController {
 
     try {
       const updatedUser = await this.userUseCase.update(
+        userId,
         firstName,
         secondName,
         email,
