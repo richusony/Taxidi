@@ -30,8 +30,9 @@ export class UserRepository {
     const userExist = await this.findById(user.id);
     if (!userExist) {
       console.log("user not found while updating");
-      return false;
+      throw new Error("user not found while updating");
     }
+
     const updatedUser = await UserModel.findOneAndUpdate(
       { _id: userExist._id },
       {

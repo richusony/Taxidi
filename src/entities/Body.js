@@ -1,6 +1,7 @@
 export class Body {
   constructor(id, bodyType) {
-    (this.id = id), (this.bodyType = bodyType);
+    this.id = id;
+    this.bodyType = bodyType;
   }
 
   // Method to validate Body data
