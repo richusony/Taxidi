@@ -1,4 +1,3 @@
-// emailService.js
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
@@ -11,7 +10,7 @@ const OAuth2 = google.auth.OAuth2;
 const oauth2Client = new OAuth2(
   process.env.CLIENT_ID,
   process.env.CLIENT_SECRET,
-  'https://developers.google.com/oauthplayground'
+  "https://developers.google.com/oauthplayground"
 );
 
 oauth2Client.setCredentials({
@@ -19,22 +18,30 @@ oauth2Client.setCredentials({
 });
 
 const getAccessToken = async () => {
-  const { token } = await oauth2Client.getAccessToken();
-  return token;
+  try {
+    const { token } = await oauth2Client.getAccessToken();
+    return token;
+  } catch (error) {
+    console.error("Error getting access token:", error.message);
+    throw new Error("Failed to obtain access token");
+  }
 };
 
+const createTransporter = async () => {
+  const accessToken = await getAccessToken();
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    type: 'OAuth2',
-    user: process.env.EMAIL_USER,
-    clientId: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    refreshToken: process.env.REFRESH_TOKEN,
-    accessToken: await getAccessToken(),
-  },
-});
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      type: "OAuth2",
+      user: process.env.EMAIL_USER,
+      clientId: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      refreshToken: process.env.REFRESH_TOKEN,
+      accessToken,
+    },
+  });
+};
 
 export const sendOtpEmail = async (to, otp) => {
   const mailOptions = {
@@ -44,14 +51,15 @@ export const sendOtpEmail = async (to, otp) => {
     text: `Your OTP code is: ${otp}`,
     html: `<p>Your OTP code is: <b>${otp}</b></p>`,
   };
+
   try {
+    const transporter = await createTransporter();
     const info = await transporter.sendMail(mailOptions);
     console.log("Email sent: " + info.response);
   } catch (error) {
-    console.error("Error sending email: " + error);
-    throw error
+    console.error("Error sending email: " + error.message);
+    throw error;
   }
-  return [process.env.EMAIL_USER, process.env.EMAIL_PASSWORD];
 };
 
 export const generateOtp = () => {
@@ -64,7 +72,7 @@ export const createAndSendOtp = async (email) => {
 
   await OtpModel.create({ email, otp: hashedOtp });
 
-  const send = await sendOtpEmail(email, otp);
+  await sendOtpEmail(email, otp);
 };
 
 export const verifyOtp = async (email, otp) => {
@@ -76,4 +84,41 @@ export const verifyOtp = async (email, otp) => {
 
   const isValid = await bcrypt.compare(otp, otpEntry.otp);
   return isValid;
+};
+
+export const sendHostApprovalMail = async (to, password) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: to,
+    subject: "Host Approval - Taxidi",
+    html: `<p>Your request to become a host on Taxidi has been approved. You can log in to your account using your email and the following password.</p>
+<p>Your Taxidi Login Password: <b>${password}</b></p>`,
+  };
+
+  try {
+    const transporter = await createTransporter();
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent: " + info.response);
+  } catch (error) {
+    console.error("Error sending email: " + error.message);
+    throw error;
+  }
+};
+
+export const sendHostRejectionMail = async (to) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: to,
+    subject: "Host Rejection - Taxidi",
+    html: `<p>Unfortunately your request has been rejected. For further information contact Customer Care.</p>`,
+  };
+
+  try {
+    const transporter = await createTransporter();
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent: " + info.response);
+  } catch (error) {
+    console.error("Error sending email: " + error.message);
+    throw error;
+  }
 };

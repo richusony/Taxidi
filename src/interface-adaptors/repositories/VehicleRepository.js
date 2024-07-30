@@ -2,7 +2,7 @@ import { VehicleModel } from "../../frameworks-and-drivers/database/mongoose/mod
 
 export class VehicleRepository {
   async save(vehicle) {
-    console.log("repository", vehicle);
+    // console.log("repository", vehicle);
     const vehicleModel = new VehicleModel({
       model: vehicle.model,
       brand: vehicle.brand,
@@ -11,15 +11,24 @@ export class VehicleRepository {
       fuel: vehicle.fuel,
       transmission: vehicle.transmission,
       seats: vehicle.seats,
-      registerationNumber: vehicle.registerationNumber,
+      rent: vehicle.rent,
+      vehicleRegistrationNumber: vehicle.vehicleRegistrationNumber,
+      registrationCertificateFrontImage:
+        vehicle.registrationCertificateFrontImage,
+      registrationCertificateBackImage:
+        vehicle.registrationCertificateBackImage,
       mileage: vehicle.mileage,
       pickUpLocation: vehicle.pickUpLocation,
       host: vehicle.host,
-      images: vehicle.images
+      vehicleImages: vehicle.vehicleImages,
+      insuranceCertificateImage: vehicle.insuranceCertificateImage,
+      pollutionCertificateImage: vehicle.pollutionCertificateImage,
+      bookingStarts: null,
+      bookingEnds: null,
     });
 
     await vehicleModel.save();
-    console.log("saved...")
+    console.log("vehicle added to database");
     return vehicleModel;
   }
 
@@ -28,10 +37,29 @@ export class VehicleRepository {
   }
 
   async findVehicleByRC(rc) {
-    return VehicleModel.findOne({registerationNumber: rc});
+    return VehicleModel.findOne({ vehicleRegistrationNumber: rc }).populate([
+      "host",
+      "brand",
+      "bodyType",
+    ]);
   }
 
   async getVehicles() {
-    return VehicleModel.find({}).populate(["brand","bodyType"]);
+    return await VehicleModel.find({}).populate(["host", "brand", "bodyType"]);
+  }
+
+  async getAllAvailableCars(bookingStarts, bookingEnds) {
+    return await VehicleModel.find({
+            $or: [
+                { bookingEnds: { $lt: bookingStarts } },  // Bookings ending before the start date
+                { bookingStarts: { $gt: bookingEnds } },  // Bookings starting after the end date
+                { bookingStarts: { $eq: null } },     // Vehicles not booked (start date is null)
+                { bookingEnds: { $eq: null } }        // Vehicles not booked (end date is null)
+            ]
+        }).populate(["host", "brand", "bodyType"]);
+  }
+
+  async getCarDetails(vehicleRegistrationNumber) {
+    return await VehicleModel.findOne({vehicleRegistrationNumber}).populate(["host", "brand", "bodyType"]);
   }
 }

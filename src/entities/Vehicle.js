@@ -8,11 +8,18 @@ export class Vehicle {
     fuel,
     transmission,
     seats,
-    registerationNumber,
+    vehicleRegistrationNumber,
+    registrationCertificateFrontImage,
+    registrationCertificateBackImage,
     mileage,
+    city,
+    pincode,
     pickUpLocation,
-    host,
-    images
+    hostId,
+    vehicleImages,
+    insuranceCertificateImage,
+    pollutionCertificateImage,
+    rent
   ) {
     this.id = id;
     this.model = model;
@@ -22,17 +29,25 @@ export class Vehicle {
     this.fuel = fuel;
     this.transmission = transmission;
     this.seats = seats;
-    this.registerationNumber = registerationNumber;
+    this.vehicleRegistrationNumber = vehicleRegistrationNumber;
+    this.registrationCertificateFrontImage = registrationCertificateFrontImage;
+    this.registrationCertificateBackImage =registrationCertificateBackImage;
     this.mileage = mileage;
+    this.city = city;
+    this.pincode = pincode;
     this.pickUpLocation = pickUpLocation;
-    this.host = host;
-    this.images = images;
+    this.host = hostId;
+    this.vehicleImages = vehicleImages;
+    this.insuranceCertificateImage = insuranceCertificateImage;
+    this.pollutionCertificateImage = pollutionCertificateImage;
+    this.rent = rent;
   }
 
   // Method to validate vehicle data
   validate() {
-    if (!this.model || !this.brand || !this.registerationNumber || !this.host) {
-      throw new Error("Fill all the required fields");
+    console.log(this.model,this.vehicleRegistrationNumber, this.host);
+    if (!this.model || !this.vehicleRegistrationNumber || !this.host) {
+      throw new Error("Fill all the required fields - Vehicle Entity");
     }
   }
 }

@@ -16,4 +16,8 @@ export class CreateBrand{
     async getBrands() {
         return this.brandRepository.getBrands();
     }
+
+    async updateBrand(brandName, brandId, brandImage){
+        return this.brandRepository.updateBrand(brandName, brandId, brandImage)
+    }
 }

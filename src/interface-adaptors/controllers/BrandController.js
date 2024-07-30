@@ -4,7 +4,9 @@ export class BrandController {
   }
 
   async createBrand(req, res) {
-    const { brandName, brandImage } = req.body;
+    const { brandName } = req.body;
+    const brandImage = req?.file?.path;
+
     // res.send("working")
     console.log(req.body);
 
@@ -16,13 +18,28 @@ export class BrandController {
     }
   }
 
-
-async getAllBrands(req, res) {
+  async getAllBrands(req, res) {
     try {
-        const brands = await this.brandUseCase.getBrands();
-        res.status(200).json(brands);
+      const brands = await this.brandUseCase.getBrands();
+      res.status(200).json(brands);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
-}
+  }
+
+  async updateBrand(req, res) {
+    const { brandName, brandId } = req.body;
+    const brandImage = req?.file?.path;
+    try {
+      const updateBrand = await this.brandUseCase.updateBrand(
+        brandName,
+        brandId,
+        brandImage
+      );
+      res.status(200);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
 }

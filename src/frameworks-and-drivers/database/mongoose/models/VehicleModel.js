@@ -8,7 +8,6 @@ const vehicleSchema = new mongoose.Schema(
     },
     brand: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: "brands",
     },
     color: {
@@ -16,41 +15,63 @@ const vehicleSchema = new mongoose.Schema(
     },
     bodyType: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: "body-types",
     },
     fuel: {
       type: String,
-      required: true,
     },
     transmission: {
       type: String,
-      required: true,
     },
     seats: {
       type: String,
-      required: true,
     },
-    registerationNumber: {
+    vehicleRegistrationNumber: {
       type: String,
-      required: true,
-      unique:true
+    },
+    registrationCertificateFrontImage: {
+      type: String,
+    },
+    registrationCertificateBackImage: {
+      type: String,
     },
     mileage: {
       type: String,
-      required: true,
+    },
+    city: {
+      type: String,
+    },
+    pincode: {
+      type: Number,
     },
     pickUpLocation: {
       type: String,
-      required: true,
     },
     host: {
-      type: String,
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "host",
     },
-    images: {
+    vehicleImages: {
       type: Array,
     },
+    insuranceCertificateImage: {
+      type: String,
+    },
+    pollutionCertificateImage: {
+      type: String,
+    },
+    rent: {
+      type: Number
+    },
+    booked: {
+      type: Boolean
+    },
+    bookingStarts: {
+      type: Date,
+    },
+    bookingEnds: {
+      type: Date,
+    }
   },
   { timestamps: true }
 );

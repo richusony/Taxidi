@@ -9,12 +9,21 @@ export class HostRequest {
     licenseNumber,
     registrationNumber,
     model,
+    brand,
+    bodyType,
+    transmission,
+    fuel,
+    mileage,
+    seats,
+    color,
+    rent,
     licenseFrontImage,
     licenseBackImage,
     registrationCertificateFrontImage,
     registrationCertificateBackImage,
     insuranceCertificateImage,
-    pollutionCertificateImage
+    pollutionCertificateImage,
+    vehicleImages
   ) {
     this.id = id;
     this.fullname = fullname;
@@ -25,12 +34,21 @@ export class HostRequest {
     this.licenseNumber = licenseNumber;
     this.registrationNumber = registrationNumber;
     this.model = model;
+    this.brand = brand;
+    this.bodyType = bodyType;
+    this.transmission = transmission;
+    this.fuel = fuel;
+    this.mileage = mileage;
+    this.seats = seats;
+    this.color = color;
+    this.rent = rent;
     this.licenseFrontImage = licenseFrontImage;
     this.licenseBackImage = licenseBackImage;
     this.registrationCertificateFrontImage = registrationCertificateFrontImage;
     this.registrationCertificateBackImage = registrationCertificateBackImage;
     this.insuranceCertificateImage = insuranceCertificateImage;
     this.pollutionCertificateImage = pollutionCertificateImage;
+    this.vehicleImages = vehicleImages;
   }
 
   validateRequest() {
@@ -48,9 +66,9 @@ export class HostRequest {
       !this.registrationCertificateFrontImage,
       !this.registrationCertificateBackImage,
       !this.insuranceCertificateImage,
-      !this.pollutionCertificateImage) 
+      !this.pollutionCertificateImage)
     ) {
-        throw new Error("Fill all required fields");
+      throw new Error("Fill all required fields");
     }
   }
 }

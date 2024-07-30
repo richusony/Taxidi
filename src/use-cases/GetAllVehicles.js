@@ -4,7 +4,10 @@ export class GetAllVehicles{
     }
 
     async getVehicles(){
-        const allVehicles = await this.vehicleRepository.getVehicles();
-        return allVehicles;
+        return this.vehicleRepository.getVehicles();
+    }
+
+    async getVehicleDetails(registrationNumber) {
+        return this.vehicleRepository.findVehicleByRC(registrationNumber)
     }
 }

@@ -6,6 +6,7 @@ export class VehicleController {
   async addCar(req, res) {
     try {
       const files = req.files;
+      let vehicleRegistrationNumber = null;
       const {
         model,
         brand,
@@ -31,7 +32,7 @@ export class VehicleController {
       }
 
       const imageUrls = await this.vehicleUseCase.uploadFiles(files);
-
+      vehicleRegistrationNumber = registerationNumber;
       const vehicle = await this.vehicleUseCase.execute(
         model,
         brand,
@@ -40,15 +41,23 @@ export class VehicleController {
         fuel,
         transmission,
         seats,
-        registerationNumber,
+        vehicleRegistrationNumber,
+        null,
+        null,
         mileage,
+        null,
+        null,
         pickUpLocation,
         host,
-        imageUrls
+        imageUrls,
+        null,
+        null
       );
 
       res.status(201).json(vehicle);
+      console.log("worked");
     } catch (error) {
+      console.log(error.message);
       res.status(400).json({ error: error.message });
     }
   }
@@ -57,6 +66,18 @@ export class VehicleController {
     try {
       const cars = await this.vehicleUseCase.getVehicles();
       res.status(200).json(cars);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async getVehicleDetails(req, res) {
+    const { registrationNumber } = req.params;
+    try {
+      const vehicleDetails = await this.vehicleUseCase.getVehicleDetails(
+        registrationNumber
+      );
+      res.status(200).json(vehicleDetails);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }

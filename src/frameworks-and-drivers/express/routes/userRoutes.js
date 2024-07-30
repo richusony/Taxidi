@@ -1,15 +1,19 @@
 import express from "express";
-import { SignUpUser } from "../../../use-cases/SignUpUser.js";
-import LoginController from "../../../interface-adaptors/controllers/LoginController.js";
-import { UserController } from "../../../interface-adaptors/controllers/UserController.js";
-import { UserRepository } from "../../../interface-adaptors/repositories/UserRepository.js";
-import { BrandRepository } from "../../../interface-adaptors/repositories/BrandRepository.js";
-import UserProfileController from "../../../interface-adaptors/controllers/UserProfileController.js";
+import Razorpay from "razorpay";
+import { userParser } from "../../external-lib/multer.js";
 import protectRoute from "../middlewares/protectRoute.js";
+import { SignUpUser } from "../../../use-cases/SignUpUser.js";
 import { UpdateUser } from "../../../use-cases/UpdateUser.js";
 import { CreateBrand } from "../../../use-cases/CreateBrand.js";
 import { OtpController } from "../../../interface-adaptors/controllers/OtpController.js";
+import LoginController from "../../../interface-adaptors/controllers/LoginController.js";
+import { UserController } from "../../../interface-adaptors/controllers/UserController.js";
+import { UserRepository } from "../../../interface-adaptors/repositories/UserRepository.js";
 import { BrandController } from "../../../interface-adaptors/controllers/BrandController.js";
+import { BrandRepository } from "../../../interface-adaptors/repositories/BrandRepository.js";
+import UserProfileController from "../../../interface-adaptors/controllers/UserProfileController.js";
+import { UserUseCase } from "../../../use-cases/UserUseCase.js";
+import { VehicleRepository } from "../../../interface-adaptors/repositories/VehicleRepository.js";
 
 const router = express.Router();
 
@@ -49,12 +53,66 @@ router.post("/update-user", protectRoute, (req, res) => {
   userController.update(req, res);
 });
 
+router.post(
+  "/upload-driving-license",
+  protectRoute,
+  userParser.fields([
+    { name: "licenseFrontImage", maxCount: 1 },
+    { name: "licenseBackImage", maxCount: 1 },
+  ]),
+  (req, res) => {
+    const userController = new UserController(updateUser);
+    userController.uploadLicense(req, res);
+  }
+);
+
 router.get("/brands", (req, res) => {
   brandController.getAllBrands(req, res);
 });
 
+router.post("/orders", async (req, res) => {
+  const razorpay = new Razorpay({
+    key_id: process.env.RAZOR_PAY_KEY_ID,
+    key_secret: process.env.RAZOR_PAY_SECRET_KEY
+  })
+
+  const options = {
+    amount: req.body.amount,
+    currency: req.body.currency,
+    receipt: "receipt#1",
+    payment_capture: 1
+  }
+
+
+  try {
+    const response = await razorpay.orders.create(options);
+console.log(response);
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.log("error :: ",error.message);
+    res.status(500);
+  }
+});
+
+router.get("/get-available-cars",(req, res) =>{
+  const vehicleRepository = new VehicleRepository();
+  const userUseCase = new UserUseCase(vehicleRepository);
+  const userController = new UserController(userUseCase);
+
+  userController.getAllAvailableCars(req, res);
+})
+
 router.get("/logout", protectRoute, (req, res) => {
   loginController.logout(req, res);
 });
+
+router.get("/car/:vehicleRegistrationNumber", (req, res)=> {
+   const vehicleRepository = new VehicleRepository();
+  const userUseCase = new UserUseCase(vehicleRepository);
+  const userController = new UserController(userUseCase);
+
+  userController.getCarDetails(req, res);
+})
 
 export default router;

@@ -14,11 +14,18 @@ export class AddVehicle {
     fuel,
     transmission,
     seats,
-    registerationNumber,
+    vehicleRegistrationNumber,
+    registrationCertificateFrontImage,
+    registrationCertificateBackImage,
     mileage,
+    city,
+    pincode,
     pickUpLocation,
-    host,
-    images
+    hostId,
+    vehicleImages,
+    insuranceCertificateImage,
+    pollutionCertificateImage,
+    rent
   ) {
     const vehicle = new Vehicle(
       null,
@@ -29,15 +36,22 @@ export class AddVehicle {
       fuel,
       transmission,
       seats,
-      registerationNumber,
+      vehicleRegistrationNumber,
+      registrationCertificateFrontImage,
+      registrationCertificateBackImage,
       mileage,
+      city,
+      pincode,
       pickUpLocation,
-      host,
-      images
+      hostId,
+      vehicleImages,
+      insuranceCertificateImage,
+      pollutionCertificateImage,
+      rent
     );
 
     vehicle.validate();
-    console.log(vehicle);
+    // console.log(vehicle);
     return this.vehicleRepository.save(vehicle);
   }
 
@@ -46,7 +60,7 @@ export class AddVehicle {
     return urls;
   }
 
-  async findByRC(rc){
-    return this.vehicleRepository.findVehicleByRC(rc)
+  async findByRC(rc) {
+    return this.vehicleRepository.findVehicleByRC(rc);
   }
 }

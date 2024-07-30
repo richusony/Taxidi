@@ -25,6 +25,12 @@ const userSchema = new mongoose.Schema({
     licenseNumber: {
         type: String,
     },
+    licenseFrontImage: {
+        type:String,
+    },
+    licenseBackImage: {
+        type:String,
+    },
     password: {
         type: String,
         required: true

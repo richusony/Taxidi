@@ -28,6 +28,38 @@ const hostRequestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    brand: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "brands",
+    },
+    bodyType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "body-types",
+    },
+    transmission: {
+      type: String,
+      required: true,
+    },
+    fuel: {
+      type: String,
+      required: true,
+    },
+    mileage: {
+      type: String,
+      required: true,
+    },
+    seats: {
+      type: String,
+      required: true,
+    },
+    color: {
+      type: String,
+      required: true,
+    },
+    rent: {
+      type: Number,
+      required: true,
+    },
     vehicleRegistrationNumber: {
       type: String,
       required: true,
@@ -61,6 +93,9 @@ const hostRequestSchema = new mongoose.Schema(
     pollutionCertificateImage: {
       type: String,
       required: true,
+    },
+    vehicleImages: {
+      type: Array,
     }
   },
   { timestamps: true }

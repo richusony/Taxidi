@@ -3,7 +3,7 @@ import { BodyModel } from "../../frameworks-and-drivers/database/mongoose/models
 export class BodyRepository {
   async save(body) {
     const bodyModel = new BodyModel({
-      bodyType: body.bodyType
+      bodyType: body.bodyType.trim().toUpperCase()
     });
 
     await bodyModel.save();

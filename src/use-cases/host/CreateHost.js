@@ -1,4 +1,4 @@
-import { Host } from "../../entities/Host";
+import { Host } from "../../entities/Host.js";
 
 export class CreateHost{
     constructor(hostRepository) {
