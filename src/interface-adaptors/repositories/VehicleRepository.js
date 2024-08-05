@@ -26,7 +26,7 @@ export class VehicleRepository {
       bookingStarts: null,
       bookingEnds: null,
     });
-
+    console.log(vehicle);
     await vehicleModel.save();
     console.log("vehicle added to database");
     return vehicleModel;
@@ -50,16 +50,24 @@ export class VehicleRepository {
 
   async getAllAvailableCars(bookingStarts, bookingEnds) {
     return await VehicleModel.find({
-            $or: [
-                { bookingEnds: { $lt: bookingStarts } },  // Bookings ending before the start date
-                { bookingStarts: { $gt: bookingEnds } },  // Bookings starting after the end date
-                { bookingStarts: { $eq: null } },     // Vehicles not booked (start date is null)
-                { bookingEnds: { $eq: null } }        // Vehicles not booked (end date is null)
-            ]
-        }).populate(["host", "brand", "bodyType"]);
+      $or: [
+        { bookingEnds: { $lt: bookingStarts } }, // Bookings ending before the start date
+        { bookingStarts: { $gt: bookingEnds } }, // Bookings starting after the end date
+        { bookingStarts: { $eq: null } }, // Vehicles not booked (start date is null)
+        { bookingEnds: { $eq: null } }, // Vehicles not booked (end date is null)
+      ],
+    }).populate(["host", "brand", "bodyType"]);
   }
 
   async getCarDetails(vehicleRegistrationNumber) {
-    return await VehicleModel.findOne({vehicleRegistrationNumber}).populate(["host", "brand", "bodyType"]);
+    return await VehicleModel.findOne({ vehicleRegistrationNumber }).populate([
+      "host",
+      "brand",
+      "bodyType",
+    ]);
+  }
+
+  async deleteVehicle(vehicleRegistrationNumber) {
+    return await VehicleModel.deleteOne({vehicleRegistrationNumber});
   }
 }

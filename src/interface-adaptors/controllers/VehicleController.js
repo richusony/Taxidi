@@ -4,26 +4,39 @@ export class VehicleController {
   }
 
   async addCar(req, res) {
-    try {
-      const files = req.files;
-      let vehicleRegistrationNumber = null;
-      const {
-        model,
-        brand,
-        color,
-        bodyType,
-        fuel,
-        transmission,
-        seats,
-        registerationNumber,
-        mileage,
-        pickUpLocation,
-        host,
-      } = req.body;
-      console.log(req.body);
+    const {
+      model,
+      brand,
+      color,
+      bodyType,
+      fuel,
+      transmission,
+      seats,
+      vehicleRegistrationNumber,
+      mileage,
+      city,
+      pincode,
+      pickUpLocation,
+      host,
+      rent,
+    } = req.body;
+    console.log(req.body);
 
+    const registrationCertificateFrontImage =
+      req.files.registrationCertificateFrontImage[0].path;
+    const registrationCertificateBackImage =
+      req.files.registrationCertificateBackImage[0].path;
+    const insuranceCertificateImage =
+      req.files.insuranceCertificateImage[0].path;
+    const pollutionCertificateImage =
+      req.files.pollutionCertificateImage[0].path;
+    const vehicleImages = await this.vehicleUseCase.uploadFiles(
+      req.files.vehicleImages
+    );
+
+    try {
       const vehicleExists = await this.vehicleUseCase.findByRC(
-        registerationNumber
+        vehicleRegistrationNumber
       );
 
       if (vehicleExists) {
@@ -31,8 +44,6 @@ export class VehicleController {
         return;
       }
 
-      const imageUrls = await this.vehicleUseCase.uploadFiles(files);
-      vehicleRegistrationNumber = registerationNumber;
       const vehicle = await this.vehicleUseCase.execute(
         model,
         brand,
@@ -42,20 +53,21 @@ export class VehicleController {
         transmission,
         seats,
         vehicleRegistrationNumber,
-        null,
-        null,
+        registrationCertificateFrontImage,
+        registrationCertificateBackImage,
         mileage,
-        null,
-        null,
+        city,
+        pincode,
         pickUpLocation,
         host,
-        imageUrls,
-        null,
-        null
+        vehicleImages,
+        insuranceCertificateImage,
+        pollutionCertificateImage,
+        rent
       );
 
       res.status(201).json(vehicle);
-      console.log("worked");
+      console.log("vehicle Added");
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
@@ -79,6 +91,19 @@ export class VehicleController {
       );
       res.status(200).json(vehicleDetails);
     } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async deleteVehicle(req, res) {
+    const { registrationNumber } = req.params;
+
+    try {
+      const deleteVehicle = await this.vehicleUseCase.deleteVehicle(registrationNumber);
+      console.log("vehicle deleted from database");
+      res.status(200).json({success: "Vehicle deleted"});
+    } catch (error) {
+      console.log(error.message);
       res.status(400).json({ error: error.message });
     }
   }

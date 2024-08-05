@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+dotenv.config();
+import jwt from "jsonwebtoken";
+
 export async function generatePassword() {
   const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const lowercase = "abcdefghijklmnopqrstuvwxyz";
@@ -13,3 +17,23 @@ export async function generatePassword() {
 
   return password;
 }
+
+export const generateRefreshToken = (userId, email) => {
+  const refreshToken = jwt.sign(
+    { id: userId, email },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY },
+  );
+  // console.log("Refresh Token :: ",refreshToken);
+  return refreshToken;
+};
+
+export const generateAccessToken = (userId, email) => {
+  const accessToken = jwt.sign(
+    { id: userId, email },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY },
+  );
+  // console.log("Access Token :: ",accessToken);
+  return accessToken;
+};

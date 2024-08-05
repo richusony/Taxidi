@@ -50,6 +50,14 @@ app.use("/admin", adminRoutes);
 // Host Routes
 app.use("/host", hostRoutes);
 
+
+
+// Global Error Handler
+// app.use((err, req, res, next) => {
+//   console.log(err);
+//   res.status(500).json({ error: err?.message });
+// });
+
 app.listen(PORT, () => {
-  console.log("listening on port : ", PORT, "ON : ", process.env.NODE_ENV);
+  console.log("listening on port :", PORT, "ON :", process.env.NODE_ENV);
 });

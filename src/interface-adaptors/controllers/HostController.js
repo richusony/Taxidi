@@ -71,7 +71,7 @@ export default class HostController {
         registrationCertificateBackImage,
         insuranceCertificateImage,
         pollutionCertificateImage,
-        vehicleImages
+        vehicleImages,
       );
       res.status(200).json(hostRequest);
     } catch (error) {
@@ -96,7 +96,7 @@ export default class HostController {
     const { vehicleRegistrationNumber } = req.params;
     try {
       const hostRequestDetails = await this.hostUseCase.getHostRequestDetails(
-        vehicleRegistrationNumber
+        vehicleRegistrationNumber,
       );
       res.status(200).json(hostRequestDetails);
     } catch (error) {
@@ -143,7 +143,7 @@ export default class HostController {
         licenseNumber,
         licenseFrontImage,
         licenseBackImage,
-        hashedHostPassword
+        hashedHostPassword,
       );
 
       const hostId = createHost._id;
@@ -167,9 +167,12 @@ export default class HostController {
         vehicleImages,
         insuranceCertificateImage,
         pollutionCertificateImage,
-        rent
+        rent,
       );
       await sendHostApprovalMail(email, hostPassword);
+      const deleteRequest = await this.hostUseCase.deleteHostRequest(
+        vehicleRegistrationNumber,
+      );
       res.status(200).json({ message: "created host and added vehicle" });
     } catch (error) {
       console.log(error.message);
@@ -180,8 +183,10 @@ export default class HostController {
   async rejectHostRequest(req, res) {
     const { email, vehicleRegistrationNumber } = req.body;
     try {
-    const deleteRequest = this.hostUseCase.deleteHostRequest(vehicleRegistrationNumber);
-    await sendHostRejectionMail(email);
+      const deleteRequest = await this.hostUseCase.deleteHostRequest(
+        vehicleRegistrationNumber,
+      );
+      await sendHostRejectionMail(email);
       console.log(error.message);
       res.status(400).json({ error: error.message });
     } catch (error) {}
@@ -200,21 +205,10 @@ export default class HostController {
   async hostLogin(req, res) {
     const { email, password } = req.body;
     let cookieOptions;
+    // console.log(email, password);
     try {
-      const host = await this.hostUseCase.findHostByEmail(email);
-      // console.log(host);
-      const isPasswordValid = await bcrypt.compare(password, host.password);
-
-      if (!isPasswordValid) {
-        res.status(401).json({ error: "Invalid Password" });
-        return;
-      }
-
-      const token = jwt.sign(
-        { id: host._id, email: host.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
+      const { host, accessToken, refreshToken } =
+        await this.hostUseCase.execute(email, password);
 
       if (process.env.NODE_ENV == "development") {
         cookieOptions = {
@@ -233,10 +227,12 @@ export default class HostController {
         };
       }
 
-      res.cookie("jwt", token, cookieOptions);
-      res.status(200).json(host);
+      res.cookie("accessToken", accessToken, cookieOptions);
+      res.cookie("refreshToken", refreshToken, cookieOptions);
+      // console.log(accessToken, "\n::::", refreshToken ,"\n::::", host);
+      res.status(200).json({ host, accessToken, refreshToken });
     } catch (error) {
-      console.log(error.message);
+      console.log(error);
       res.status(400).json({ error: error.message });
     }
   }
@@ -268,9 +264,25 @@ export default class HostController {
   }
 
   async hostLogout(req, res) {
+    const incomingRefreshToken = req.cookies?.refreshToken;
     try {
+      const loggedOut =
+        await this.hostUseCase.logoutWithRefreshToken(incomingRefreshToken);
+
+      if (!loggedOut) {
+        return res
+          .status(400)
+          .json({ error: "Something went wrong while logging out" });
+      }
+
       if (process.env.NODE_ENV == "development") {
-        res.cookie("jwt", "", {
+        console.log("reached developmet");
+        res.cookie("accessToken", "", {
+          httpOnly: true,
+          expires: new Date(0), // Set the expiration date to the past to clear the cookie
+          sameSite: "Lax",
+        });
+        res.cookie("refreshToken", "", {
           httpOnly: true,
           expires: new Date(0), // Set the expiration date to the past to clear the cookie
           sameSite: "Lax",
@@ -278,7 +290,13 @@ export default class HostController {
       }
 
       if (process.env.NODE_ENV == "production") {
-        res.cookie("jwt", "", {
+        res.cookie("accessToken", "", {
+          httpOnly: true,
+          expires: new Date(0), // Set the expiration date to the past to clear the cookie
+          sameSite: "None",
+          secure: true,
+        });
+        res.cookie("refreshToken", "", {
           httpOnly: true,
           expires: new Date(0), // Set the expiration date to the past to clear the cookie
           sameSite: "None",
@@ -286,6 +304,18 @@ export default class HostController {
         });
       }
       res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async authenticateHost(req, res) {
+    try {
+      const hostId = req.hostDetails._id;
+      const host = await this.hostUseCase.auth(hostId);
+      console.log(host);
+      res.status(200).json({ host });
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });

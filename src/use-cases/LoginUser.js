@@ -1,5 +1,8 @@
 import bcrypt from "bcrypt";
+import dotenv from "dotenv";
+dotenv.config();
 import jwt from "jsonwebtoken";
+import { generateAccessToken, generateRefreshToken } from "../utils/helper.js";
 
 class LoginUser {
   constructor(userRepository) {
@@ -13,12 +16,12 @@ class LoginUser {
     }
 
     if (googleLogin) {
-      const token = jwt.sign(
-        { id: user._id, email: user.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-      return { user, token };
+      const refreshToken = generateRefreshToken(user._id, user.email);
+      const accessToken = generateAccessToken(user._id, user.email);
+      user.refreshToken = refreshToken;
+      await user.save({ validateBeforeSave: false });
+
+      return { user, refreshToken, accessToken };
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -26,30 +29,54 @@ class LoginUser {
       throw new Error("Incorrect Password");
     }
 
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    const refreshToken = generateRefreshToken(user._id, user.email);
+    const accessToken = generateAccessToken(user._id, user.email);
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
 
-    return { user, token };
+    return { user, refreshToken, accessToken };
   }
 
-  // async checkPassword(password){
-  //  const user = await this.userRepository.findByEmail(email);
-  //   if (!user) {
-  //     return "User doesn't exists"
-  //   }
+  async refreshToken(token) {
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
-  //   if (googleLogin) {
-  //       return true
-  //   }
+    const user = await this.userRepository.findByEmail(decoded?.email);
 
-  //   const isPasswordValid = await bcrypt.compare(password, user.password);
-  //   if (!isPasswordValid) {
-  //     return "Invalid Password"
-  //   }
-  // }
+    if (!user) {
+      throw new Error("user doesn't exists - RefreshToken");
+    }
+
+    if (token !== user?.refreshToken) {
+      throw new Error("Invalid Refresh Token");
+    }
+
+    const accessToken = generateAccessToken(user?._id, user?.email);
+    // const refreshToken = generateRefreshToken(user?._id, user?.email);
+
+    // user.refreshToken = refreshToken;
+    // await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken: token };
+  }
+
+  async logoutWithRefreshToken(token) {
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    // console.log(decoded);
+    const user = await this.userRepository.findByEmail(decoded?.email);
+
+    if (!user) {
+      throw new Error("user doesn't exists - RefreshToken");
+    }
+
+    if (token !== user?.refreshToken) {
+      throw new Error("Invalid Refresh Token");
+    }
+
+    user.refreshToken = null;
+    await user.save({ validateBeforeSave: false });
+
+    return true;
+  }
 }
 
 export default LoginUser;

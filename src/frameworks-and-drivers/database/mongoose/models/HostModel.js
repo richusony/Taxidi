@@ -33,12 +33,19 @@ const hostSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    refreshToken: {
+      type: String,
+    },
+    role: {
+      type: String,
+      default: "host",
+    },
     blocked: {
       type: Boolean,
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const HostModel = mongoose.model("host", hostSchema);

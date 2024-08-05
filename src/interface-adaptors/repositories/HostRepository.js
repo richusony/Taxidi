@@ -75,6 +75,10 @@ export class HostRepository {
     return await HostRequestModel.deleteOne({ vehicleRegistrationNumber });
   }
 
+  async findById(hostId) {
+    return await HostModel.findById(hostId);
+  }
+
   async findByEmail(email) {
     return await HostModel.findOne({ email });
   }
