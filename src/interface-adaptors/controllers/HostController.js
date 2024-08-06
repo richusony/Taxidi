@@ -179,12 +179,12 @@ export default class HostController {
   }
 
   async rejectHostRequest(req, res) {
-    const { email, vehicleRegistrationNumber } = req.body;
+    const { email, vehicleRegistrationNumber, rejectMsg } = req.body;
     try {
       const deleteRequest = await this.hostUseCase.deleteHostRequest(
         vehicleRegistrationNumber,
       );
-      await sendHostRejectionMail(email);
+      await sendHostRejectionMail(email, rejectMsg);
       console.log(error.message);
       res.status(400).json({ error: error.message });
     } catch (error) {}

@@ -105,12 +105,12 @@ export const sendHostApprovalMail = async (to, password) => {
   }
 };
 
-export const sendHostRejectionMail = async (to) => {
+export const sendHostRejectionMail = async (to, rejectMessage) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: to,
     subject: "Host Rejection - Taxidi",
-    html: `<p>Unfortunately your request has been rejected. For further information contact Customer Care.</p>`,
+    html: `<p>Unfortunately your request has been rejected. Reason: <h1 style="color:'red'; font-weight:700;">${rejectMessage}</h1>.<br> For further information contact Customer Care.</p>`,
   };
 
   try {
