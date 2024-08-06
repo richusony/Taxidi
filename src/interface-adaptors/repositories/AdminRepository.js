@@ -1,4 +1,6 @@
 import { AdminModel } from "../../frameworks-and-drivers/database/mongoose/models/AdminModel.js";
+import AdminTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/AdminPaymentHistory.js";
+import AdminWalletModel from "../../frameworks-and-drivers/database/mongoose/models/AdminWallet.js";
 
 export class AdminRepository {
   async save(admin) {
@@ -21,5 +23,39 @@ export class AdminRepository {
 
   async findByEmail(email) {
     return AdminModel.findOne({ email });
+  }
+
+  async addToAdminWalletAndHistory(
+    adminId,
+    hostId,
+    paymentId,
+    userId,
+    vehicleId,
+    totalAmount,
+    commissionToAdmin,
+    balanceAfterCommission,
+    paymentMethod,
+  ) {
+    try {
+      const addToWallet = await AdminWalletModel.create({
+        balance: balanceAfterCommission,
+        adminId: adminId,
+      });
+      const addToTransactions = await AdminTransactionModel.create({
+        adminId: adminId,
+        balanceAfterCommission: balanceAfterCommission,
+        commissionToAdmin: commissionToAdmin,
+        hostId: hostId,
+        paidBy: userId,
+        totalAmount: totalAmount,
+        paymentId: paymentId,
+        vehicleId: vehicleId,
+        paymentMethod: paymentMethod,
+      });
+
+      return addToWallet;
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 }

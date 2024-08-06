@@ -41,10 +41,6 @@ class LoginAdmin {
     }
 
     const accessToken = generateAccessToken(admin?._id, admin?.email);
-    // const refreshToken = generateRefreshToken(admin?._id, admin?.email);
-
-    // admin.refreshToken = refreshToken;
-    // await admin.save({ validateBeforeSave: false });
 
     return { accessToken, refreshToken: token };
   }

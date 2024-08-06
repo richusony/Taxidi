@@ -1,20 +1,23 @@
 import express from "express";
-import Razorpay from "razorpay";
+import { verifyRole } from "../middlewares/verifyRole.js";
 import { userParser } from "../../external-lib/multer.js";
 import protectRoute from "../middlewares/protectRoute.js";
 import { SignUpUser } from "../../../use-cases/SignUpUser.js";
 import { UpdateUser } from "../../../use-cases/UpdateUser.js";
 import { CreateBrand } from "../../../use-cases/CreateBrand.js";
+import { UserUseCase } from "../../../use-cases/UserUseCase.js";
+import { BookingUseCase } from "../../../use-cases/BookingUseCase.js";
+import { UserWalletUseCase } from "../../../use-cases/UserWalletUseCase.js";
 import { OtpController } from "../../../interface-adaptors/controllers/OtpController.js";
 import LoginController from "../../../interface-adaptors/controllers/LoginController.js";
 import { UserController } from "../../../interface-adaptors/controllers/UserController.js";
+import { HostRepository } from "../../../interface-adaptors/repositories/HostRepository.js";
 import { UserRepository } from "../../../interface-adaptors/repositories/UserRepository.js";
 import { BrandController } from "../../../interface-adaptors/controllers/BrandController.js";
 import { BrandRepository } from "../../../interface-adaptors/repositories/BrandRepository.js";
-import UserProfileController from "../../../interface-adaptors/controllers/UserProfileController.js";
-import { UserUseCase } from "../../../use-cases/UserUseCase.js";
+import { AdminRepository } from "../../../interface-adaptors/repositories/AdminRepository.js";
 import { VehicleRepository } from "../../../interface-adaptors/repositories/VehicleRepository.js";
-import { verifyRole } from "../middlewares/verifyRole.js";
+import UserProfileController from "../../../interface-adaptors/controllers/UserProfileController.js";
 
 const router = express.Router();
 
@@ -72,30 +75,6 @@ router.get("/brands", (req, res) => {
   brandController.getAllBrands(req, res);
 });
 
-router.post("/orders", async (req, res) => {
-  const razorpay = new Razorpay({
-    key_id: process.env.RAZOR_PAY_KEY_ID,
-    key_secret: process.env.RAZOR_PAY_SECRET_KEY,
-  });
-
-  const options = {
-    amount: req.body.amount,
-    currency: req.body.currency,
-    receipt: "receipt#1",
-    payment_capture: 1,
-  };
-
-  try {
-    const response = await razorpay.orders.create(options);
-    console.log(response);
-
-    res.status(200).json(response);
-  } catch (error) {
-    console.log("error :: ", error.message);
-    res.status(500);
-  }
-});
-
 router.get("/get-available-cars", (req, res) => {
   const vehicleRepository = new VehicleRepository();
   const userUseCase = new UserUseCase(vehicleRepository);
@@ -112,11 +91,47 @@ router.get("/car/:vehicleRegistrationNumber", (req, res) => {
   userController.getCarDetails(req, res);
 });
 
-router.post("/refresh-token", (req, res) => loginController.userRefreshToken(req, res));
+router.post("/book-vehicle", protectRoute, verifyRole("user"), (req, res) => {
+  const vehicleRepository = new VehicleRepository();
+  const userUseCase = new UserUseCase(vehicleRepository);
+  const userController = new UserController(userUseCase);
+
+  userController.bookVehicle(req, res);
+});
+
+router.post("/verify-booking", protectRoute, verifyRole("user"), (req, res) => {
+  const vehicleRepository = new VehicleRepository();
+  const adminRepository = new AdminRepository();
+  const hostRepository = new HostRepository();
+  const userUseCase = new BookingUseCase(
+    userRepository,
+    adminRepository,
+    vehicleRepository,
+    hostRepository,
+  );
+  const userController = new UserController(userUseCase);
+
+  userController.verifyBooking(req, res);
+});
+
+router.post("/add-to-wallet", protectRoute, verifyRole("user"), (req, res) => {
+  const userController = new UserController();
+  userController.addMoneyToWallet(req, res);
+});
+
+router.post("/verify-add-money-payment", protectRoute, verifyRole("user"), (req, res) => {
+  const userUseCase = new UserWalletUseCase(userRepository);
+  const userController = new UserController(userUseCase);
+
+  userController.verifyPaymentForAddToWallet(req, res);
+});
+
+router.post("/refresh-token", (req, res) =>
+  loginController.userRefreshToken(req, res),
+);
 
 router.get("/logout", protectRoute, verifyRole("user"), (req, res) => {
   loginController.logout(req, res);
 });
-
 
 export default router;

@@ -33,7 +33,15 @@ export class VehicleRepository {
   }
 
   async findByModel(model) {
-    return VehicleModel.findOne({ model: model });
+    return await VehicleModel.findOne({ model: model });
+  }
+
+  async findById(id) {
+    try {
+      return await VehicleModel.findById(id);
+    } catch (error) {
+      console.log("vehicle repo", error.message);
+    }
   }
 
   async findVehicleByRC(rc) {
@@ -68,6 +76,23 @@ export class VehicleRepository {
   }
 
   async deleteVehicle(vehicleRegistrationNumber) {
-    return await VehicleModel.deleteOne({vehicleRegistrationNumber});
+    return await VehicleModel.deleteOne({ vehicleRegistrationNumber });
+  }
+
+  async bookVehicle(vehicleId, startDate, endDate) {
+    try {
+      const updateVehilce = await VehicleModel.findByIdAndUpdate(
+        { _id: vehicleId },
+        {
+          booked: true,
+          bookingStarts: startDate,
+          bookingEnds: endDate,
+        },
+      );
+      
+      return updateVehilce;
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 }

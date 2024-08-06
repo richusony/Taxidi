@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+dotenv.config();
+import Razorpay from "razorpay";
+
 export class UserController {
   constructor(userUseCase) {
     this.userUseCase = userUseCase;
@@ -37,7 +41,7 @@ export class UserController {
         pincode,
         null,
         false,
-        password
+        password,
       );
       res.status(201).json(user);
     } catch (error) {
@@ -55,7 +59,7 @@ export class UserController {
       email,
       phone,
       city,
-      pincode
+      pincode,
     );
 
     if (!firstName || !email || !pincode) {
@@ -70,7 +74,7 @@ export class UserController {
         email,
         phone,
         city,
-        pincode
+        pincode,
       );
       if (!updatedUser) {
         res
@@ -87,7 +91,7 @@ export class UserController {
 
   async uploadLicense(req, res) {
     const userId = req.user._id;
-    const {licenseNumber} = req.body;
+    const { licenseNumber } = req.body;
     const licenseFrontImage = req?.files?.licenseFrontImage[0].path;
     const licenseBackImage = req?.files?.licenseBackImage[0].path;
 
@@ -96,7 +100,7 @@ export class UserController {
         userId,
         licenseNumber,
         licenseFrontImage,
-        licenseBackImage
+        licenseBackImage,
       );
       res.status(200).json(upload);
     } catch (error) {
@@ -118,7 +122,8 @@ export class UserController {
     const { licenseNumber } = req.params;
 
     try {
-      const licenseRequest = await this.userUseCase.getLicenseRequest(licenseNumber);
+      const licenseRequest =
+        await this.userUseCase.getLicenseRequest(licenseNumber);
       res.status(200).json(licenseRequest);
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -126,10 +131,16 @@ export class UserController {
   }
 
   async saveApprovedLicense(req, res) {
-    const {userId, licenseNumber, licenseBackImage, licenseFrontImage} = req.body;
+    const { userId, licenseNumber, licenseBackImage, licenseFrontImage } =
+      req.body;
 
     try {
-      const saveLicense = await this.userUseCase.saveLicense(userId._id, licenseNumber, licenseFrontImage, licenseBackImage);
+      const saveLicense = await this.userUseCase.saveLicense(
+        userId._id,
+        licenseNumber,
+        licenseFrontImage,
+        licenseBackImage,
+      );
       res.status(200).json(saveLicense);
     } catch (error) {
       console.log(error.message);
@@ -140,11 +151,16 @@ export class UserController {
   async getAllAvailableCars(req, res) {
     const { bookingStarts, bookingEnds } = req.query;
     if (!bookingStarts || !bookingEnds) {
-        return res.status(400).json({ error: 'Missing required query parameters' });
+      return res
+        .status(400)
+        .json({ error: "Missing required query parameters" });
     }
 
     try {
-      const availableCars = await this.userUseCase.getAllAvailableCars(bookingStarts, bookingEnds);
+      const availableCars = await this.userUseCase.getAllAvailableCars(
+        bookingStarts,
+        bookingEnds,
+      );
       // console.log(availableCars);
       res.status(200).json(availableCars);
     } catch (error) {
@@ -154,10 +170,113 @@ export class UserController {
   }
 
   async getCarDetails(req, res) {
-    const {vehicleRegistrationNumber} = req.params;
+    const { vehicleRegistrationNumber } = req.params;
     try {
-      const carDetails = await this.userUseCase.getCarDetails(vehicleRegistrationNumber);
+      const carDetails = await this.userUseCase.getCarDetails(
+        vehicleRegistrationNumber,
+      );
       res.status(200).json(carDetails);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async bookVehicle(req, res) {
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZOR_PAY_KEY_ID,
+      key_secret: process.env.RAZOR_PAY_SECRET_KEY,
+    });
+
+    const options = {
+      amount: req.body.amount,
+      currency: req.body.currency,
+      receipt: "receipt#1",
+      payment_capture: 1,
+    };
+
+    try {
+      const response = await razorpay.orders.create(options);
+      // console.log(response);
+      // const savePaymentDetails = await this.userUseCase.bookVehicle(response);
+      res.status(200).json(response);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async verifyBooking(req, res) {
+    const userId = req.user._id;
+    const { paymentDetails, vehicleId, queryStartDate, queryEndDate } =
+      req.body;
+    try {
+      const razorpay = new Razorpay({
+        key_id: process.env.RAZOR_PAY_KEY_ID,
+        key_secret: process.env.RAZOR_PAY_SECRET_KEY,
+      });
+
+      const verifyPayment = await razorpay.payments.fetch(
+        paymentDetails.razorpay_payment_id,
+      );
+
+      const saveTransactions = await this.userUseCase.saveTransactions(
+        userId,
+        vehicleId,
+        queryStartDate,
+        queryEndDate,
+        verifyPayment,
+      );
+      console.log(verifyPayment);
+      res.status(200);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async addMoneyToWallet(req, res) {
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZOR_PAY_KEY_ID,
+      key_secret: process.env.RAZOR_PAY_SECRET_KEY,
+    });
+
+    const options = {
+      amount: req.body.amount,
+      currency: req.body.currency,
+      receipt: "wallet_reciept#1",
+      payment_capture: 1,
+    };
+
+    try {
+      const response = await razorpay.orders.create(options);
+      console.log(response);
+      res.status(200).json(response);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async verifyPaymentForAddToWallet(req, res) {
+    const userId = req.user._id;
+    const { razorpay_payment_id } = req.body;
+    try {
+      const razorpay = new Razorpay({
+        key_id: process.env.RAZOR_PAY_KEY_ID,
+        key_secret: process.env.RAZOR_PAY_SECRET_KEY,
+      });
+
+      const verifyPayment = await razorpay.payments.fetch(razorpay_payment_id);
+      console.log(verifyPayment);
+      const amount = verifyPayment.amount / 100;
+      const addToWallet = await this.userUseCase.addMoneyToWallet(
+        userId,
+        verifyPayment.id,
+        amount,
+        verifyPayment.method,
+        "Added to Wallet",
+      );
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });

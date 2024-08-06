@@ -70,6 +70,12 @@ router.get(
   },
 );
 
+router.post("/refresh-token", (req, res) => {
+  const hostUseCase = new HostLogin(hostRepository);
+  const hostController = new HostController(hostUseCase);
+  hostController.hostRefreshToken(req, res);
+});
+
 router.get("/logout", hostProtectedRoute, verifyRole("host"), (req, res) => {
   const hostUseCase = new HostLogin(hostRepository);
   const hostController = new HostController(hostUseCase);

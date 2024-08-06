@@ -3,6 +3,8 @@ import { BodyModel } from "../../frameworks-and-drivers/database/mongoose/models
 import { BrandModel } from "../../frameworks-and-drivers/database/mongoose/models/BrandModel.js";
 import { VehicleModel } from "../../frameworks-and-drivers/database/mongoose/models/VehicleModel.js";
 import HostRequestModel from "../../frameworks-and-drivers/database/mongoose/models/HostRequestModel.js";
+import HostWalletModel from "../../frameworks-and-drivers/database/mongoose/models/HostWallet.js";
+import HostTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/hostPaymentHistory.js";
 
 export class HostRepository {
   async saveHost(host) {
@@ -97,5 +99,37 @@ export class HostRepository {
     return await VehicleModel.find({
       vehicleRegistrationNumber: vehicleNumber,
     }).populate("host");
+  }
+
+  async addToHostWalletAndHistory(
+    hostId,
+    paymentId,
+    userId,
+    vehicleId,
+    totalAmount,
+    commissionToAdmin,
+    balanceAfterCommission,
+    paymentMethod,
+  ) {
+    try {
+      const addToWallet = await HostWalletModel.create({
+        balance: balanceAfterCommission,
+        hostId: hostId,
+      });
+      const addToTransactions = await HostTransactionModel.create({
+        balanceAfterCommission: balanceAfterCommission,
+        commissionToAdmin: commissionToAdmin,
+        hostId: hostId,
+        paidBy: userId,
+        totalAmount: totalAmount,
+        paymentId: paymentId,
+        vehicleId: vehicleId,
+        paymentMethod: paymentMethod,
+      });
+
+      return addToWallet;
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 }

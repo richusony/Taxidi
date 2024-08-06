@@ -42,6 +42,24 @@ export class HostLogin {
     }
   }
 
+  async refreshToken(token) {
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+    const host = await this.hostRepository.findByEmail(decoded?.email);
+
+    if (!host) {
+      throw new Error("host doesn't exists - RefreshToken");
+    }
+
+    if (token !== host?.refreshToken) {
+      throw new Error("Invalid Refresh Token");
+    }
+
+    const accessToken = generateAccessToken(host?._id, host?.email);
+
+    return { accessToken, refreshToken: token };
+  }
+
   async logoutWithRefreshToken(token) {
     const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
     // console.log(decoded);

@@ -1,5 +1,7 @@
 import { UserModel } from "../../frameworks-and-drivers/database/mongoose/models/UserModel.js";
+import UserWalletModel from "../../frameworks-and-drivers/database/mongoose/models/UserWallet.js";
 import { LicenseVerifyModel } from "../../frameworks-and-drivers/database/mongoose/models/UserLicenseVerifyModel.js";
+import UserTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/UserPaymentHistory.js";
 
 export class UserRepository {
   async save(user) {
@@ -44,7 +46,7 @@ export class UserRepository {
         city: user.city,
         pincode: user.pincode,
       },
-      { new: true }
+      { new: true },
     );
 
     return updatedUser;
@@ -54,16 +56,18 @@ export class UserRepository {
     userId,
     licenseNumber,
     licenseFrontImage,
-    licenseBackImage
+    licenseBackImage,
   ) {
     try {
       const updateUser = await UserModel.findByIdAndUpdate(
         { _id: userId },
         { licenseNumber, licenseFrontImage, licenseBackImage },
-        { new: true }
+        { new: true },
       );
 
-      const removeRequest = await LicenseVerifyModel.findOneAndDelete({licenseNumber});
+      const removeRequest = await LicenseVerifyModel.findOneAndDelete({
+        licenseNumber,
+      });
       return updateUser;
     } catch (error) {
       console.error("Error uploading and saving license:", error);
@@ -77,7 +81,7 @@ export class UserRepository {
         licenseNumber: request.licenseNumber,
         licenseFrontImage: request.licenseFrontImage,
         licenseBackImage: request.licenseBackImage,
-        userId: request.userId
+        userId: request.userId,
       });
 
       await userLicenseModel.save();
@@ -92,7 +96,38 @@ export class UserRepository {
     return await LicenseVerifyModel.find({}).populate("userId");
   }
 
-  async findLicenseVerificationRequestByLicenseNumber(licenseNumber){
-    return await LicenseVerifyModel.find({licenseNumber}).populate("userId");
+  async findLicenseVerificationRequestByLicenseNumber(licenseNumber) {
+    return await LicenseVerifyModel.find({ licenseNumber }).populate("userId");
+  }
+
+  async addMoneyToWallet(
+    userId,
+    paymentId,
+    amount,
+    paymentMethod,
+    paymentMessage,
+  ) {
+    console.log("userRep",userId, paymentId, amount, paymentMethod, paymentMessage);
+    try {
+      const addToWallet = await UserWalletModel.updateOne(
+        { userId },
+        {
+          $inc: { balance: amount },
+        },
+      );
+
+      const addtoTransactions = await UserTransactionModel.create({
+        userId,
+        amount,
+        paymentId,
+        paymentMethod,
+        paymentMessage,
+        credited: true,
+      });
+
+      return addToWallet;
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 }

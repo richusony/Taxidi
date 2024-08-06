@@ -21,6 +21,7 @@ const protectRoute = async (req, res, next) => {
     }
 
     const host = await HostModel.findById(decoded.id);
+
     if (!host) {
       return res.status(404).json({ error: "host not found" });
     }

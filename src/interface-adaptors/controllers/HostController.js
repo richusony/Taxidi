@@ -1,12 +1,10 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { generatePassword } from "../../utils/helper.js";
-import { passwordHashing } from "../../frameworks-and-drivers/external-lib/passwordHashing.js";
 import {
   sendHostApprovalMail,
   sendHostRejectionMail,
 } from "../../frameworks-and-drivers/external-lib/emailService.js";
 import { uploadImages } from "../../frameworks-and-drivers/external-lib/imageUpload.js";
+import { passwordHashing } from "../../frameworks-and-drivers/external-lib/passwordHashing.js";
 
 export default class HostController {
   constructor(hostUseCase, vehicleUseCase) {
@@ -314,8 +312,39 @@ export default class HostController {
     try {
       const hostId = req.hostDetails._id;
       const host = await this.hostUseCase.auth(hostId);
-      console.log(host);
+      // console.log(host);
       res.status(200).json({ host });
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async hostRefreshToken(req, res) {
+    const incomingRefreshToken = req.cookies?.refreshToken;
+    // console.log("refreshToken from frontend :", incomingRefreshToken);
+    let cookieOptions;
+    try {
+      const { accessToken, refreshToken } =
+        await this.hostUseCase.refreshToken(incomingRefreshToken);
+      if (process.env.NODE_ENV == "development") {
+        cookieOptions = {
+          httpOnly: true, // safety, does not allow cookie to be read in the frontend javascript
+          sameSite: "Lax", // works for local development
+        };
+      }
+
+      if (process.env.NODE_ENV == "production") {
+        cookieOptions = {
+          httpOnly: true, // safety, does not allow cookie to be read in the frontend javascript
+          sameSite: "None", // works for local development
+          secure: true,
+        };
+      }
+      console.log("host acccess token refreshed");
+      res.cookie("accessToken", accessToken, cookieOptions);
+      res.cookie("refreshToken", refreshToken, cookieOptions);
+      res.status(200).json({ accessToken, refreshToken });
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
