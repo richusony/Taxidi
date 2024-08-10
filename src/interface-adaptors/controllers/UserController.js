@@ -268,7 +268,7 @@ export class UserController {
       });
 
       const verifyPayment = await razorpay.payments.fetch(razorpay_payment_id);
-      console.log(verifyPayment);
+      console.log("payment verified");
       const amount = verifyPayment.amount / 100;
       const addToWallet = await this.userUseCase.addMoneyToWallet(
         userId,
@@ -280,6 +280,56 @@ export class UserController {
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
+    }
+  }
+
+  async postReivew(req, res) {
+    const userId = req.user._id;
+    const { vehicleId, reviewMsg } = req.body;
+    console.log(req.body);
+    try {
+      const addReview = await this.userUseCase.postReview(userId, vehicleId, reviewMsg);
+      res.status(200).json(addReview);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async getVehicleReviews(req, res) {
+    const { vehicleRegistrationNumber } = req.body;
+    console.log(req.body);
+    try {
+      const vehicleReviews = await this.userUseCase.getVehicleReviews(vehicleRegistrationNumber);
+      // console.log(vehicleReviews);
+      res.status(200).json(vehicleReviews);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({error: error.message});
+      }
+  }
+
+  async getWallet(req, res) {
+      const userId = req.user._id;
+    try {
+      const walletDetails = await this.userUseCase.getWallet(userId);
+      // console.log(walletDetails);
+      res.status(200).json(walletDetails);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({error: error.message});
+    }
+  }
+
+  async getAllBookings(req, res) {
+    const userId = req.user._id;
+    try {
+      const bookings = await this.userUseCase.getAllBookings(userId);
+      console.log("fetched bookings...");
+      res.status(200).json(bookings);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).status({error: error.message});
     }
   }
 }

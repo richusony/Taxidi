@@ -5,6 +5,7 @@ import { VehicleModel } from "../../frameworks-and-drivers/database/mongoose/mod
 import HostRequestModel from "../../frameworks-and-drivers/database/mongoose/models/HostRequestModel.js";
 import HostWalletModel from "../../frameworks-and-drivers/database/mongoose/models/HostWallet.js";
 import HostTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/hostPaymentHistory.js";
+import VehicleBookingModel from "../../frameworks-and-drivers/database/mongoose/models/VehicleBookingModel.js";
 
 export class HostRepository {
   async saveHost(host) {
@@ -126,8 +127,26 @@ export class HostRepository {
         vehicleId: vehicleId,
         paymentMethod: paymentMethod,
       });
+      const addToBookings = await VehicleBookingModel.create({
+        balanceAfterCommission: balanceAfterCommission,
+        commissionToAdmin: commissionToAdmin,
+        hostId: hostId,
+        paidBy: userId,
+        totalAmount: totalAmount,
+        paymentId: paymentId,
+        vehicleId: vehicleId,
+        paymentMethod: paymentMethod,
+      });
 
       return addToWallet;
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async getAllBookings(userId) {
+    try {
+      return await VehicleBookingModel.find({paidBy: userId}).populate(["hostId","vehicleId"]);
     } catch (error) {
       console.log(error.message);
     }

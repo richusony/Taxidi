@@ -18,4 +18,12 @@ export class UserWalletUseCase {
       paymentMessage
     );
   }
+
+  async getWallet(userId) {
+    try {
+      return await this.userRepository.getWallet(userId);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 }

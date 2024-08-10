@@ -130,4 +130,12 @@ export class UserRepository {
       console.log(error.message);
     }
   }
+
+  async getWallet(userId){
+    try {
+      return await UserWalletModel.findOne({userId});
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 }

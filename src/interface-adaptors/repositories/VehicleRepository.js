@@ -1,4 +1,5 @@
 import { VehicleModel } from "../../frameworks-and-drivers/database/mongoose/models/VehicleModel.js";
+import VehicleReviewModel from "../../frameworks-and-drivers/database/mongoose/models/vehicleReviewModel.js";
 
 export class VehicleRepository {
   async save(vehicle) {
@@ -89,8 +90,31 @@ export class VehicleRepository {
           bookingEnds: endDate,
         },
       );
-      
+
       return updateVehilce;
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async postReview(userId, vehicleId, reviewMsg) {
+    try {
+      return await VehicleReviewModel.create({
+        reviewMessage: reviewMsg,
+        userId,
+        vehicleId,
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async getReviews(vehicleRegistrationNumber) {
+    try {
+      const vehicle = VehicleModel.findOne({ vehicleRegistrationNumber });
+      if (!vehicle) throw new Error("vehicle not found - VehicleRepository");
+
+      return await VehicleReviewModel.find({}).populate(["userId", "vehicleId"])
     } catch (error) {
       console.log(error.message);
     }

@@ -10,4 +10,8 @@ export class UserUseCase {
     async getCarDetails(vehicleRegistrationNumber) {
         return await this.repository.getCarDetails(vehicleRegistrationNumber);
     }
+
+    async getAllBookings(userId) {
+        return await this.repository.getAllBookings(userId);
+    }
 }
