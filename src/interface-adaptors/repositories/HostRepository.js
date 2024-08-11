@@ -4,7 +4,7 @@ import { BrandModel } from "../../frameworks-and-drivers/database/mongoose/model
 import { VehicleModel } from "../../frameworks-and-drivers/database/mongoose/models/VehicleModel.js";
 import HostRequestModel from "../../frameworks-and-drivers/database/mongoose/models/HostRequestModel.js";
 import HostWalletModel from "../../frameworks-and-drivers/database/mongoose/models/HostWallet.js";
-import HostTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/hostPaymentHistory.js";
+import HostTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/HostPaymentHistory.js";
 import VehicleBookingModel from "../../frameworks-and-drivers/database/mongoose/models/VehicleBookingModel.js";
 
 export class HostRepository {
@@ -147,6 +147,14 @@ export class HostRepository {
   async getAllBookings(userId) {
     try {
       return await VehicleBookingModel.find({paidBy: userId}).populate(["hostId","vehicleId"]);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async getBookingDetails(paymentId) {
+    try {
+      return await VehicleBookingModel.findOne({paymentId}).populate(["hostId","vehicleId"]);
     } catch (error) {
       console.log(error.message);
     }

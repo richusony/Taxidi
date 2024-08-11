@@ -8,6 +8,7 @@ import { CreateBrand } from "../../../use-cases/CreateBrand.js";
 import { UserUseCase } from "../../../use-cases/UserUseCase.js";
 import { BookingUseCase } from "../../../use-cases/BookingUseCase.js";
 import { UserWalletUseCase } from "../../../use-cases/UserWalletUseCase.js";
+import { VehicleReviewUseCase } from "../../../use-cases/VehicleReviewUseCase.js";
 import { OtpController } from "../../../interface-adaptors/controllers/OtpController.js";
 import LoginController from "../../../interface-adaptors/controllers/LoginController.js";
 import { UserController } from "../../../interface-adaptors/controllers/UserController.js";
@@ -18,7 +19,6 @@ import { BrandRepository } from "../../../interface-adaptors/repositories/BrandR
 import { AdminRepository } from "../../../interface-adaptors/repositories/AdminRepository.js";
 import { VehicleRepository } from "../../../interface-adaptors/repositories/VehicleRepository.js";
 import UserProfileController from "../../../interface-adaptors/controllers/UserProfileController.js";
-import { VehicleReviewUseCase } from "../../../use-cases/VehicleReviewUseCase.js";
 
 const router = express.Router();
 
@@ -175,6 +175,14 @@ router.get("/bookings", protectRoute, verifyRole("user"), (req, res) => {
   const userController = new UserController(useCse);
 
   userController.getAllBookings(req, res);
+});
+
+router.get("/booking-details/:paymentId", protectRoute, verifyRole("user"), (req, res) => {
+  const hostRepository = new HostRepository();
+  const useCse = new UserUseCase(hostRepository);
+  const userController = new UserController(useCse);
+
+  userController.getBookingDetails(req, res);
 });
 
 export default router;

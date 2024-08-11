@@ -305,19 +305,19 @@ export class UserController {
       res.status(200).json(vehicleReviews);
     } catch (error) {
       console.log(error.message);
-      res.status(400).json({error: error.message});
-      }
+      res.status(400).json({ error: error.message });
+    }
   }
 
   async getWallet(req, res) {
-      const userId = req.user._id;
+    const userId = req.user._id;
     try {
       const walletDetails = await this.userUseCase.getWallet(userId);
       // console.log(walletDetails);
       res.status(200).json(walletDetails);
     } catch (error) {
       console.log(error.message);
-      res.status(400).json({error: error.message});
+      res.status(400).json({ error: error.message });
     }
   }
 
@@ -329,7 +329,19 @@ export class UserController {
       res.status(200).json(bookings);
     } catch (error) {
       console.log(error.message);
-      res.status(400).status({error: error.message});
+      res.status(400).status({ error: error.message });
     }
+  }
+
+  async getBookingDetails(req, res) {
+    const { paymentId } = req.params;
+    try {
+      const bookingDetails = await this.userUseCase.getBookingDetails(paymentId);
+      console.log("fetched payment details of ", paymentId);
+      res.status(200).json(bookingDetails);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).status({ error: error.message });
+    } 
   }
 }

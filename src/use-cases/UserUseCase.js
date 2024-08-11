@@ -14,4 +14,8 @@ export class UserUseCase {
     async getAllBookings(userId) {
         return await this.repository.getAllBookings(userId);
     }
+
+    async getBookingDetails(paymentId){
+        return await this.repository.getBookingDetails(paymentId);
+    }
 }
