@@ -141,6 +141,7 @@ export class UserController {
         licenseFrontImage,
         licenseBackImage,
       );
+      console.log("saved user license");
       res.status(200).json(saveLicense);
     } catch (error) {
       console.log(error.message);
@@ -161,7 +162,8 @@ export class UserController {
         bookingStarts,
         bookingEnds,
       );
-      // console.log(availableCars);
+      console.log(availableCars);
+      console.log("fetched all available vechiles in", bookingStarts, "-", bookingEnds);
       res.status(200).json(availableCars);
     } catch (error) {
       console.log(error.message);
@@ -175,6 +177,7 @@ export class UserController {
       const carDetails = await this.userUseCase.getCarDetails(
         vehicleRegistrationNumber,
       );
+      console.log("fetched vehicle Details of ", vehicleRegistrationNumber);
       res.status(200).json(carDetails);
     } catch (error) {
       console.log(error.message);
@@ -227,7 +230,7 @@ export class UserController {
         queryEndDate,
         verifyPayment,
       );
-      console.log(verifyPayment);
+      console.log("booking of vehicle :",vehicleId,"by",userId, "has been successfull");
       res.status(200);
     } catch (error) {
       console.log(error.message);
@@ -250,7 +253,7 @@ export class UserController {
 
     try {
       const response = await razorpay.orders.create(options);
-      console.log(response);
+      // console.log(response);
       res.status(200).json(response);
     } catch (error) {
       console.log(error.message);
@@ -283,12 +286,13 @@ export class UserController {
     }
   }
 
-  async postReivew(req, res) {
+  async postReviewAndRating(req, res) {
     const userId = req.user._id;
-    const { vehicleId, reviewMsg } = req.body;
-    console.log(req.body);
+    const { vehicleId, reviewMsg, rating } = req.body;
+    // console.log(req.body);
     try {
-      const addReview = await this.userUseCase.postReview(userId, vehicleId, reviewMsg);
+      const addReview = await this.userUseCase.postReviewAndRating(userId, vehicleId, reviewMsg, rating);
+      console.log("review posted successfully!!");
       res.status(200).json(addReview);
     } catch (error) {
       console.log(error.message);
@@ -298,10 +302,10 @@ export class UserController {
 
   async getVehicleReviews(req, res) {
     const { vehicleRegistrationNumber } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     try {
       const vehicleReviews = await this.userUseCase.getVehicleReviews(vehicleRegistrationNumber);
-      // console.log(vehicleReviews);
+      console.log("fetched vehicle reviews of ",vehicleRegistrationNumber);
       res.status(200).json(vehicleReviews);
     } catch (error) {
       console.log(error.message);
@@ -313,7 +317,7 @@ export class UserController {
     const userId = req.user._id;
     try {
       const walletDetails = await this.userUseCase.getWallet(userId);
-      // console.log(walletDetails);
+      console.log("fetched user wallet of ", userId);
       res.status(200).json(walletDetails);
     } catch (error) {
       console.log(error.message);

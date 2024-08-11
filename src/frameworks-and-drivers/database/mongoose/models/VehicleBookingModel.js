@@ -34,10 +34,17 @@ const bookingSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    bookingStatus: {
-      type: Boolean,
+    bookingStarts: {
+      type: Date,
       required: true,
-      default: true,
+    },
+    bookingEnds: {
+      type: Date,
+      required: true,
+    },
+    bookinStatus: {
+      type:Boolean,
+      default:true
     },
     bookingCancelReason: {
       type: String,

@@ -1,4 +1,6 @@
+import VehicleBookingModel from "../../frameworks-and-drivers/database/mongoose/models/VehicleBookingModel.js";
 import { VehicleModel } from "../../frameworks-and-drivers/database/mongoose/models/VehicleModel.js";
+import VehicleRatingModel from "../../frameworks-and-drivers/database/mongoose/models/vehicleRatingModel.js";
 import VehicleReviewModel from "../../frameworks-and-drivers/database/mongoose/models/vehicleReviewModel.js";
 
 export class VehicleRepository {
@@ -58,15 +60,83 @@ export class VehicleRepository {
   }
 
   async getAllAvailableCars(bookingStarts, bookingEnds) {
-    return await VehicleModel.find({
-      $or: [
-        { bookingEnds: { $lt: bookingStarts } }, // Bookings ending before the start date
-        { bookingStarts: { $gt: bookingEnds } }, // Bookings starting after the end date
-        { bookingStarts: { $eq: null } }, // Vehicles not booked (start date is null)
-        { bookingEnds: { $eq: null } }, // Vehicles not booked (end date is null)
-      ],
-    }).populate(["host", "brand", "bodyType"]);
+    return await VehicleModel.aggregate([
+      {
+        $lookup: {
+          from: "vehicle_bookings",
+          localField: "_id",
+          foreignField: "vehicleId",
+          as: "bookings"
+        }
+      },
+      {
+        $addFields: {
+          isBookedDuringPeriod: {
+            $anyElementTrue: {
+              $map: {
+                input: "$bookings",
+                as: "booking",
+                in: {
+                  $and: [
+                    { $lte: ["$booking.bookingEnds", bookingEnds] },
+                    { $gte: ["$booking.bookingStarts", bookingStarts] }
+                  ]
+                }
+              }
+            }
+          },
+          hasBookings: { $gt: [{ $size: "$bookings" }, 0] }
+        }
+      },
+      {
+        $match: {
+          $or: [
+            { isBookedDuringPeriod: false }, // Vehicles not booked during the specified period
+            { hasBookings: false } // Vehicles with no bookings at all
+          ]
+        }
+      },
+      {
+        $lookup: {
+          from: "brands",
+          localField: "brand",
+          foreignField: "_id",
+          as: "brandDetails"
+        }
+      },
+      {
+        $unwind: {
+          path: "$brandDetails",
+          preserveNullAndEmptyArrays: true // Optional: Keep vehicles even if brand details are missing
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          model: 1,
+          color: 1,
+          bodyType: 1,
+          fuel: 1,
+          transmission: 1,
+          seats: 1,
+          vehicleRegistrationNumber: 1,
+          registrationCertificateFrontImage: 1,
+          registrationCertificateBackImage: 1,
+          mileage: 1,
+          city: 1,
+          pincode: 1,
+          pickUpLocation: 1,
+          host: 1,
+          vehicleImages: 1,
+          insuranceCertificateImage: 1,
+          pollutionCertificateImage: 1,
+          rent: 1,
+          brandDetails: 1 // Include brand details in the output
+        }
+      }
+    ]);
   }
+
 
   async getCarDetails(vehicleRegistrationNumber) {
     return await VehicleModel.findOne({ vehicleRegistrationNumber }).populate([
@@ -97,12 +167,20 @@ export class VehicleRepository {
     }
   }
 
-  async postReview(userId, vehicleId, reviewMsg) {
+  async postReviewAndRating(userId, vehicleId, reviewMsg, rating) {
     try {
-      return await VehicleReviewModel.create({
+      await VehicleReviewModel.create({
         reviewMessage: reviewMsg,
         userId,
         vehicleId,
+      });
+
+     return await VehicleRatingModel.create({
+        vehicleId,
+        cleanliness: Number(rating.cleanliness),
+        maintenance: Number(rating.maintenance),
+        convenience: Number(rating.convenience),
+        timing: Number(rating.timing)
       });
     } catch (error) {
       console.log(error.message);
@@ -111,10 +189,10 @@ export class VehicleRepository {
 
   async getReviews(vehicleRegistrationNumber) {
     try {
-      const vehicle = VehicleModel.findOne({ vehicleRegistrationNumber });
+      const vehicle = await VehicleModel.findOne({ vehicleRegistrationNumber });
       if (!vehicle) throw new Error("vehicle not found - VehicleRepository");
 
-      return await VehicleReviewModel.find({}).populate(["userId", "vehicleId"])
+      return await VehicleReviewModel.find({ vehicleId: vehicle._id }).populate(["userId", "vehicleId"])
     } catch (error) {
       console.log(error.message);
     }

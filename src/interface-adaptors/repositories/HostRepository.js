@@ -154,7 +154,37 @@ export class HostRepository {
 
   async getBookingDetails(paymentId) {
     try {
-      return await VehicleBookingModel.findOne({paymentId}).populate(["hostId","vehicleId"]);
+      // return await VehicleBookingModel.findOne({ paymentId }).populate(["hostId", "vehicleId"]);
+      return await VehicleBookingModel.aggregate([
+        { $match: { paymentId } },
+        {
+          $lookup: {
+            from: "vehicles",
+            localField: "vehicleId",
+            foreignField: "_id",
+            as: "vehicleDetails"
+          }
+        },
+        {
+          $unwind: "$vehicleDetails" // Flatten the array to access nested fields
+        },
+        {
+          $lookup: {
+            from: "hosts",
+            localField: "hostId",
+            foreignField: "_id",
+            as: "hostDetails"
+          }
+        },
+        {
+          $lookup: {
+            from: "brands",
+            localField: "vehicleDetails.brand",
+            foreignField: "_id",
+            as: "brandDetails"
+          }
+        }
+      ]);
     } catch (error) {
       console.log(error.message);
     }

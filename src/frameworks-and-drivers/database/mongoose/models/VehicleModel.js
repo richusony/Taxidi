@@ -62,15 +62,6 @@ const vehicleSchema = new mongoose.Schema(
     },
     rent: {
       type: Number
-    },
-    booked: {
-      type: Boolean
-    },
-    bookingStarts: {
-      type: Date,
-    },
-    bookingEnds: {
-      type: Date,
     }
   },
   { timestamps: true }

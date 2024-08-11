@@ -140,10 +140,10 @@ router.post("/post-reivew", protectRoute, verifyRole("user"), (req, res) => {
   );
   const userController = new UserController(reviewUseCase);
 
-  userController.postReivew(req, res);
+  userController.postReviewAndRating(req, res);
 });
 
-router.get("/vehicle-reivews", (req, res) => {
+router.post("/vehicle-reivews", (req, res) => {
   const vehicleRepository = new VehicleRepository();
   const reviewUseCase = new VehicleReviewUseCase(
     userRepository,
