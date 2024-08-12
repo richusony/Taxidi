@@ -146,7 +146,7 @@ export class HostRepository {
 
   async getAllBookings(userId) {
     try {
-      return await VehicleBookingModel.find({paidBy: userId}).populate(["hostId","vehicleId"]);
+      return await VehicleBookingModel.find({ paidBy: userId }).populate(["hostId", "vehicleId"]);
     } catch (error) {
       console.log(error.message);
     }
@@ -182,6 +182,33 @@ export class HostRepository {
             localField: "vehicleDetails.brand",
             foreignField: "_id",
             as: "brandDetails"
+          }
+        }
+      ]);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async getAllBookings(hostId) {
+    try {
+     return await VehicleBookingModel.aggregate([
+        { $match: { hostId } },
+        { $sort: { createdAt: -1 } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "paidBy",
+            foreignField: "_id",
+            as: "userDetails"
+          }
+        },
+        {
+          $lookup: {
+            from: "vehicles",
+            localField: "vehicleId",
+            foreignField: "_id",
+            as: "vehicleDetails"
           }
         }
       ]);
