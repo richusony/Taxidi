@@ -151,8 +151,12 @@ router.post("/vehicle-reivews", (req, res) => {
   );
   const userController = new UserController(reviewUseCase);
 
-  userController.getVehicleReviews(req, res);
+  userController.getVehicleReviewsAndRating(req, res);
 });
+
+// router.post("/get-vehicle-reivews", protectRoute, verifyRole("user"), (req, res) => {
+
+// });
 
 router.get("/wallet", protectRoute, verifyRole("user"), (req, res) => {
   const useCse = new UserWalletUseCase(userRepository);

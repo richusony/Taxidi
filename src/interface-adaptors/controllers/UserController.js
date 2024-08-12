@@ -162,7 +162,7 @@ export class UserController {
         bookingStarts,
         bookingEnds,
       );
-      console.log(availableCars);
+      // console.log(availableCars);
       console.log("fetched all available vechiles in", bookingStarts, "-", bookingEnds);
       res.status(200).json(availableCars);
     } catch (error) {
@@ -300,11 +300,11 @@ export class UserController {
     }
   }
 
-  async getVehicleReviews(req, res) {
+  async getVehicleReviewsAndRating(req, res) {
     const { vehicleRegistrationNumber } = req.body;
     // console.log(req.body);
     try {
-      const vehicleReviews = await this.userUseCase.getVehicleReviews(vehicleRegistrationNumber);
+      const vehicleReviews = await this.userUseCase.getVehicleReviewsAndRating(vehicleRegistrationNumber);
       console.log("fetched vehicle reviews of ",vehicleRegistrationNumber);
       res.status(200).json(vehicleReviews);
     } catch (error) {

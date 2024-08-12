@@ -23,9 +23,9 @@ export class VehicleReviewUseCase {
     }
   }
 
-  async getVehicleReviews(vehicleRegistrationNumber) {
+  async getVehicleReviewsAndRating(vehicleRegistrationNumber) {
     try {
-      return await this.vehicleRepository.getReviews(vehicleRegistrationNumber);
+      return await this.vehicleRepository.getReviewsAndRating(vehicleRegistrationNumber);
     } catch (error) {
       console.log(error.message);
     }

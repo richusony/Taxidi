@@ -175,7 +175,7 @@ export class VehicleRepository {
         vehicleId,
       });
 
-     return await VehicleRatingModel.create({
+      return await VehicleRatingModel.create({
         vehicleId,
         cleanliness: Number(rating.cleanliness),
         maintenance: Number(rating.maintenance),
@@ -187,12 +187,41 @@ export class VehicleRepository {
     }
   }
 
-  async getReviews(vehicleRegistrationNumber) {
+  async getReviewsAndRating(vehicleRegistrationNumber) {
     try {
       const vehicle = await VehicleModel.findOne({ vehicleRegistrationNumber });
       if (!vehicle) throw new Error("vehicle not found - VehicleRepository");
 
-      return await VehicleReviewModel.find({ vehicleId: vehicle._id }).populate(["userId", "vehicleId"])
+      const reviews = await VehicleReviewModel.find({ vehicleId: vehicle._id }).populate(["userId", "vehicleId"]);
+      const rating = await VehicleRatingModel.aggregate([
+        { $match: { vehicleId: vehicle._id } },
+        { $group: {
+          _id: "$vehicleId",
+          Cleanliness: { $avg: "$cleanliness" },
+          Maintenance: { $avg: "$maintenance" },
+          Convenience: { $avg: "$convenience" },
+          Timing: { $avg: "$timing"},
+          TotalNumberOfRatings: { $sum: 1 }
+        }},
+        { $project: {
+          _id: 0,
+          Cleanliness: 1,
+          Maintenance: 1,
+          Convenience: 1,
+          Timing: 1,
+          TotalAverage: {
+            $avg: [
+              "$Cleanliness",
+              "$Maintenance",
+              "$Convenience",
+              "$Timing"
+            ]
+          },
+          TotalNumberOfRatings: 1
+        }}
+      ]);
+
+      return { reviews, rating };
     } catch (error) {
       console.log(error.message);
     }
