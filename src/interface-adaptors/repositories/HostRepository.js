@@ -107,6 +107,8 @@ export class HostRepository {
     paymentId,
     userId,
     vehicleId,
+    tripStarts,
+    tripEnds,
     totalAmount,
     commissionToAdmin,
     balanceAfterCommission,
@@ -136,6 +138,8 @@ export class HostRepository {
         paymentId: paymentId,
         vehicleId: vehicleId,
         paymentMethod: paymentMethod,
+        bookingStarts: tripStarts,
+        bookingEnds: tripEnds
       });
 
       return addToWallet;
@@ -144,7 +148,7 @@ export class HostRepository {
     }
   }
 
-  async getAllBookings(userId) {
+  async getAllUserBookings(userId) {
     try {
       return await VehicleBookingModel.find({ paidBy: userId }).populate(["hostId", "vehicleId"]);
     } catch (error) {

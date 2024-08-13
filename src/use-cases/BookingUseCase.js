@@ -48,6 +48,8 @@ export class BookingUseCase {
         paymentId,
         user._id,
         vehicle._id,
+        queryStartDate,
+        queryEndDate,
         totalAmount,
         commissionToAdmin,
         balanceAfterCommission,
