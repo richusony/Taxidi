@@ -77,6 +77,13 @@ router.get("/bookings", hostProtectedRoute, verifyRole("host"), (req, res) => {
   hostController.getAllBookings(req,res);
 });
 
+router.get("/booking-details/:paymentId", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const hostUseCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(hostUseCase);
+
+  hostController.getBookingDetails(req,res);
+});
+
 router.post("/refresh-token", (req, res) => {
   const hostUseCase = new HostLogin(hostRepository);
   const hostController = new HostController(hostUseCase);

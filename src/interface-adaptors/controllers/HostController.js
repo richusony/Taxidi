@@ -187,7 +187,7 @@ export default class HostController {
       await sendHostRejectionMail(email, rejectMsg);
       console.log(error.message);
       res.status(400).json({ error: error.message });
-    } catch (error) {}
+    } catch (error) { }
   }
 
   async getAllHosts(req, res) {
@@ -357,8 +357,21 @@ export default class HostController {
     try {
       const bookings = await this.hostUseCase.getAllBookings(hostId);
       // console.log(bookings);
-      console.log("fetched all bookings of host:",hostName);
+      console.log("fetched all bookings of host:", hostName);
       res.status(200).json(bookings);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async getBookingDetails(req, res) {
+    const { paymentId } = req.params;
+    try {
+      const bookingDetails = await this.hostUseCase.getBookingDetails(paymentId);
+      console.log("host fetch booking details of", paymentId);
+      // console.log(bookingDetails);
+      res.status(200).json(bookingDetails);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });

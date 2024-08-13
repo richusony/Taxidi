@@ -16,4 +16,8 @@ export class HostUseCase{
     async getAllBookings(hostId) {
         return await this.hostRepository.getAllBookings(hostId);
     }
+
+    async getBookingDetails(paymentId) {
+        return await this.hostRepository.getBookingDetails(paymentId);
+    }
 }
