@@ -12,7 +12,7 @@ export class UserUseCase {
     }
 
     async getAllBookings(userId) {
-        return await this.repository.getAllBookings(userId);
+        return await this.repository.getAllUserBookings(userId);
     }
 
     async getBookingDetails(paymentId){

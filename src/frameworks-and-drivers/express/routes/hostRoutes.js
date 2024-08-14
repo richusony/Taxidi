@@ -1,12 +1,12 @@
 import express from "express";
+import { verifyRole } from "../middlewares/verifyRole.js";
 import { hostParser } from "../../external-lib/multer.js";
 import { HostLogin } from "../../../use-cases/host/HostLogin.js";
+import { HostUseCase } from "../../../use-cases/host/HostUseCase.js";
 import hostProtectedRoute from "../middlewares/hostProtectedRoute.js";
 import { HostRequestUseCase } from "../../../use-cases/host/HostRequest.js";
 import HostController from "../../../interface-adaptors/controllers/HostController.js";
 import { HostRepository } from "../../../interface-adaptors/repositories/HostRepository.js";
-import { HostUseCase } from "../../../use-cases/host/HostUseCase.js";
-import { verifyRole } from "../middlewares/verifyRole.js";
 
 const router = express.Router();
 const hostRepository = new HostRepository();
@@ -69,6 +69,20 @@ router.get(
     hostController.getHostCarDetails(req, res);
   },
 );
+
+router.get("/bookings", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const hostUseCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(hostUseCase);
+
+  hostController.getAllBookings(req,res);
+});
+
+router.get("/booking-details/:paymentId", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const hostUseCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(hostUseCase);
+
+  hostController.getBookingDetails(req,res);
+});
 
 router.post("/refresh-token", (req, res) => {
   const hostUseCase = new HostLogin(hostRepository);
