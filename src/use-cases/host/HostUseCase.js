@@ -20,4 +20,12 @@ export class HostUseCase{
     async getBookingDetails(paymentId) {
         return await this.hostRepository.getBookingDetails(paymentId);
     }
+
+    async cancelBooking(paymentId, cancelReason) {
+        return await this.hostRepository.cancelBookingByHost(paymentId, cancelReason);
+    }
+
+    async getWalletInfo(hostId) {
+        return await this.hostRepository.getWalletInfo(hostId);
+    }
 }

@@ -187,7 +187,7 @@ export default class HostController {
       await sendHostRejectionMail(email, rejectMsg);
       console.log(error.message);
       res.status(400).json({ error: error.message });
-    } catch (error) { }
+    } catch (error) {}
   }
 
   async getAllHosts(req, res) {
@@ -368,13 +368,41 @@ export default class HostController {
   async getBookingDetails(req, res) {
     const { paymentId } = req.params;
     try {
-      const bookingDetails = await this.hostUseCase.getBookingDetails(paymentId);
+      const bookingDetails =
+        await this.hostUseCase.getBookingDetails(paymentId);
       console.log("host fetch booking details of", paymentId);
       // console.log(bookingDetails);
       res.status(200).json(bookingDetails);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
+    }
+  }
+
+  async cancelBooking(req, res) {
+    const { paymentId, cancelReason } = req.body;
+    try {
+      const cancelling = await this.hostUseCase.cancelBooking(
+        paymentId,
+        cancelReason,
+      );
+      console.log("Booking Cancelled of Payment Id", paymentId, "By Host");
+      res.status(200).json(cancelling);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async getWalletInfo(req, res) {
+    const hostId = req.hostDetails._id;
+
+    try {
+      const wallet = await this.hostUseCase.getWalletInfo(hostId);
+      res.status(200).json(wallet);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({error: error.message});
     }
   }
 }

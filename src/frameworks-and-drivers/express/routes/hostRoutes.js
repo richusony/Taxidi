@@ -84,6 +84,20 @@ router.get("/booking-details/:paymentId", hostProtectedRoute, verifyRole("host")
   hostController.getBookingDetails(req,res);
 });
 
+router.post("/cancel-booking", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const hostUseCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(hostUseCase);
+
+  hostController.cancelBooking(req, res);
+});
+
+router.get("/wallet", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const hostUseCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(hostUseCase);
+
+  hostController.getWalletInfo(req, res);
+});
+
 router.post("/refresh-token", (req, res) => {
   const hostUseCase = new HostLogin(hostRepository);
   const hostController = new HostController(hostUseCase);

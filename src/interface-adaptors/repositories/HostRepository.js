@@ -1,9 +1,9 @@
 import HostModel from "../../frameworks-and-drivers/database/mongoose/models/HostModel.js";
 import { BodyModel } from "../../frameworks-and-drivers/database/mongoose/models/BodyModel.js";
 import { BrandModel } from "../../frameworks-and-drivers/database/mongoose/models/BrandModel.js";
+import HostWalletModel from "../../frameworks-and-drivers/database/mongoose/models/HostWallet.js";
 import { VehicleModel } from "../../frameworks-and-drivers/database/mongoose/models/VehicleModel.js";
 import HostRequestModel from "../../frameworks-and-drivers/database/mongoose/models/HostRequestModel.js";
-import HostWalletModel from "../../frameworks-and-drivers/database/mongoose/models/HostWallet.js";
 import HostTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/HostPaymentHistory.js";
 import VehicleBookingModel from "../../frameworks-and-drivers/database/mongoose/models/VehicleBookingModel.js";
 
@@ -220,4 +220,25 @@ export class HostRepository {
       console.log(error.message);
     }
   }
+
+  async cancelBookingByHost(paymentId, cancelReason) {
+    try {
+      const findBooking = await VehicleBookingModel.findOne({paymentId});
+      if (!findBooking) throw new Error("No Booking Found on this Payment Id", paymentId);
+
+      findBooking.bookingCancelReason = cancelReason;
+      findBooking.bookinStatus = false;
+      return await findBooking.save();
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+async getWalletInfo(hostId) {
+  try {
+    return await HostWalletModel.findOne({hostId});
+  } catch (error) {
+    console.log(error.message);
+  }
+}
 }
