@@ -8,10 +8,10 @@ export class BrandController {
     const brandImage = req?.file?.path;
 
     // res.send("working")
-    console.log(req.body);
-
+    // console.log(req.body);
+    
     try {
-      const brand = await this.brandUseCase.execute(brandName, brandImage);
+      const brand = await this.brandUseCase.execute(brandName.toUpperCase(), brandImage);
       res.status(201).json(brand);
     } catch (error) {
       res.status(400).json({ error: error.message });

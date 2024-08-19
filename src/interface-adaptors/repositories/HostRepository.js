@@ -150,7 +150,7 @@ export class HostRepository {
 
   async getAllUserBookings(userId) {
     try {
-      return await VehicleBookingModel.find({ paidBy: userId }).populate(["hostId", "vehicleId"]);
+      return await VehicleBookingModel.find({ paidBy: userId }).sort({createdAt: -1}).populate(["hostId", "vehicleId"]);
     } catch (error) {
       console.log(error.message);
     }

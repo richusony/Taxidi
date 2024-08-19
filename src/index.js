@@ -18,7 +18,7 @@ connectMongoDB(MONGODB_URI);
 const whitelist = [
   "http://localhost:5173",
   "https://taxidi.vercel.app",
-  "http://192.168.1.2:5173",
+  "http://192.168.1.3:5173",
   "http://103.175.136.101:5173",
 ];
 
@@ -51,12 +51,6 @@ app.use("/admin", adminRoutes);
 app.use("/host", hostRoutes);
 
 
-
-// Global Error Handler
-// app.use((err, req, res, next) => {
-//   console.log(err);
-//   res.status(500).json({ error: err?.message });
-// });
 
 app.listen(PORT, () => {
   console.log("listening on port :", PORT, "ON :", process.env.NODE_ENV);

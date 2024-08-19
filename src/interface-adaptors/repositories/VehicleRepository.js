@@ -59,84 +59,46 @@ export class VehicleRepository {
     return await VehicleModel.find({}).populate(["host", "brand", "bodyType"]);
   }
 
-  async getAllAvailableCars(bookingStarts, bookingEnds) {
-    return await VehicleModel.aggregate([
-      {
-        $lookup: {
-          from: "vehicle_bookings",
-          localField: "_id",
-          foreignField: "vehicleId",
-          as: "bookings"
+  async getAllAvailableCars(bookingStartsString, bookingEndsString) {
+    const bookingStarts = new Date(`${bookingStartsString}:00Z`); // Appending seconds and time zone
+    const bookingEnds = new Date(`${bookingEndsString}:00Z`);
+    try {
+      // Step 1: Aggregate overlapping bookings to get booked vehicle IDs
+      const bookedVehicleIds = await VehicleBookingModel.aggregate([
+        {
+          $match: {
+            bookingStarts: { $lte: bookingEnds },
+            bookingEnds: { $gte: bookingStarts }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            vehicleIds: { $addToSet: "$vehicleId" }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            vehicleIds: 1
+          }
         }
-      },
-      {
-        $addFields: {
-          isBookedDuringPeriod: {
-            $anyElementTrue: {
-              $map: {
-                input: "$bookings",
-                as: "booking",
-                in: {
-                  $and: [
-                    { $lte: ["$booking.bookingEnds", bookingEnds] },
-                    { $gte: ["$booking.bookingStarts", bookingStarts] }
-                  ]
-                }
-              }
-            }
-          },
-          hasBookings: { $gt: [{ $size: "$bookings" }, 0] }
-        }
-      },
-      {
-        $match: {
-          $or: [
-            { isBookedDuringPeriod: false }, // Vehicles not booked during the specified period
-            { hasBookings: false } // Vehicles with no bookings at all
-          ]
-        }
-      },
-      {
-        $lookup: {
-          from: "brands",
-          localField: "brand",
-          foreignField: "_id",
-          as: "brandDetails"
-        }
-      },
-      {
-        $unwind: {
-          path: "$brandDetails",
-          preserveNullAndEmptyArrays: true // Optional: Keep vehicles even if brand details are missing
-        }
-      },
-      {
-        $project: {
-          _id: 1,
-          model: 1,
-          color: 1,
-          bodyType: 1,
-          fuel: 1,
-          transmission: 1,
-          seats: 1,
-          vehicleRegistrationNumber: 1,
-          registrationCertificateFrontImage: 1,
-          registrationCertificateBackImage: 1,
-          mileage: 1,
-          city: 1,
-          pincode: 1,
-          pickUpLocation: 1,
-          host: 1,
-          vehicleImages: 1,
-          insuranceCertificateImage: 1,
-          pollutionCertificateImage: 1,
-          rent: 1,
-          brandDetails: 1 // Include brand details in the output
-        }
-      }
-    ]);
+      ]);
+  
+      // Extract vehicle IDs from the aggregation result
+      const vehicleIds = bookedVehicleIds.length > 0 ? bookedVehicleIds[0].vehicleIds : [];
+      console.log(bookedVehicleIds);
+      // Step 2: Find vehicles not in the list of booked vehicle IDs
+      const availableCars = await VehicleModel.find({
+        _id: { $nin: vehicleIds }
+      }).populate(["brand"]);
+      // console.log(availableCars);
+      return availableCars;
+    } catch (error) {
+      console.error('Error fetching available cars:', error);
+      throw error;
+    }
   }
-
 
   async getCarDetails(vehicleRegistrationNumber) {
     return await VehicleModel.findOne({ vehicleRegistrationNumber }).populate([
@@ -195,30 +157,34 @@ export class VehicleRepository {
       const reviews = await VehicleReviewModel.find({ vehicleId: vehicle._id }).populate(["userId", "vehicleId"]);
       const rating = await VehicleRatingModel.aggregate([
         { $match: { vehicleId: vehicle._id } },
-        { $group: {
-          _id: "$vehicleId",
-          Cleanliness: { $avg: "$cleanliness" },
-          Maintenance: { $avg: "$maintenance" },
-          Convenience: { $avg: "$convenience" },
-          Timing: { $avg: "$timing"},
-          TotalNumberOfRatings: { $sum: 1 }
-        }},
-        { $project: {
-          _id: 0,
-          Cleanliness: 1,
-          Maintenance: 1,
-          Convenience: 1,
-          Timing: 1,
-          TotalAverage: {
-            $avg: [
-              "$Cleanliness",
-              "$Maintenance",
-              "$Convenience",
-              "$Timing"
-            ]
-          },
-          TotalNumberOfRatings: 1
-        }}
+        {
+          $group: {
+            _id: "$vehicleId",
+            Cleanliness: { $avg: "$cleanliness" },
+            Maintenance: { $avg: "$maintenance" },
+            Convenience: { $avg: "$convenience" },
+            Timing: { $avg: "$timing" },
+            TotalNumberOfRatings: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            Cleanliness: 1,
+            Maintenance: 1,
+            Convenience: 1,
+            Timing: 1,
+            TotalAverage: {
+              $avg: [
+                "$Cleanliness",
+                "$Maintenance",
+                "$Convenience",
+                "$Timing"
+              ]
+            },
+            TotalNumberOfRatings: 1
+          }
+        }
       ]);
 
       return { reviews, rating };
