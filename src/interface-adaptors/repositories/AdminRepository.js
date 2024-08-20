@@ -1,6 +1,7 @@
 import { AdminModel } from "../../frameworks-and-drivers/database/mongoose/models/AdminModel.js";
 import AdminTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/AdminPaymentHistory.js";
 import AdminWalletModel from "../../frameworks-and-drivers/database/mongoose/models/AdminWallet.js";
+import MessageModel from "../../frameworks-and-drivers/database/mongoose/models/MessageModel.js";
 
 export class AdminRepository {
   async save(admin) {
@@ -56,6 +57,35 @@ export class AdminRepository {
       return addToWallet;
     } catch (error) {
       console.log(error.message);
+    }
+  }
+
+  async sendMessageToHost(to, from, msg) {
+    try {
+      return await MessageModel.create({
+        message: msg,
+        msgFrom: from,
+        msgTo: to
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async getHostMessages(hostEmail) {
+    try {
+      return await MessageModel.aggregate([
+        {
+          $match: {
+            $or: [
+              { msgFrom: hostEmail },
+              { msgTo: hostEmail }
+            ]
+          }
+        }
+      ])
+    } catch (error) {
+      console.log(error);
     }
   }
 }

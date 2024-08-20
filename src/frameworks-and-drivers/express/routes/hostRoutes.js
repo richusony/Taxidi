@@ -7,6 +7,7 @@ import hostProtectedRoute from "../middlewares/hostProtectedRoute.js";
 import { HostRequestUseCase } from "../../../use-cases/host/HostRequest.js";
 import HostController from "../../../interface-adaptors/controllers/HostController.js";
 import { HostRepository } from "../../../interface-adaptors/repositories/HostRepository.js";
+import { Messages } from "../../../use-cases/host/Messages.js";
 
 const router = express.Router();
 const hostRepository = new HostRepository();
@@ -96,6 +97,20 @@ router.get("/wallet", hostProtectedRoute, verifyRole("host"), (req, res) => {
   const hostController = new HostController(hostUseCase);
 
   hostController.getWalletInfo(req, res);
+});
+
+router.post("/send-message", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const hostUseCase = new Messages(hostRepository);
+  const hostController = new HostController(hostUseCase);
+
+  hostController.sendMessageToAdmin(req, res);
+});
+
+router.get("/get-messages", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const hostUseCase = new Messages(hostRepository);
+  const hostController = new HostController(hostUseCase);
+
+  hostController.getAdminMessages(req, res);
 });
 
 router.post("/refresh-token", (req, res) => {

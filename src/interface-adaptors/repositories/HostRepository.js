@@ -6,6 +6,7 @@ import { VehicleModel } from "../../frameworks-and-drivers/database/mongoose/mod
 import HostRequestModel from "../../frameworks-and-drivers/database/mongoose/models/HostRequestModel.js";
 import HostTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/HostPaymentHistory.js";
 import VehicleBookingModel from "../../frameworks-and-drivers/database/mongoose/models/VehicleBookingModel.js";
+import MessageModel from "../../frameworks-and-drivers/database/mongoose/models/MessageModel.js";
 
 export class HostRepository {
   async saveHost(host) {
@@ -150,7 +151,7 @@ export class HostRepository {
 
   async getAllUserBookings(userId) {
     try {
-      return await VehicleBookingModel.find({ paidBy: userId }).sort({createdAt: -1}).populate(["hostId", "vehicleId"]);
+      return await VehicleBookingModel.find({ paidBy: userId }).sort({ createdAt: -1 }).populate(["hostId", "vehicleId"]);
     } catch (error) {
       console.log(error.message);
     }
@@ -196,7 +197,7 @@ export class HostRepository {
 
   async getAllBookings(hostId) {
     try {
-     return await VehicleBookingModel.aggregate([
+      return await VehicleBookingModel.aggregate([
         { $match: { hostId } },
         { $sort: { createdAt: -1 } },
         {
@@ -223,7 +224,7 @@ export class HostRepository {
 
   async cancelBookingByHost(paymentId, cancelReason) {
     try {
-      const findBooking = await VehicleBookingModel.findOne({paymentId});
+      const findBooking = await VehicleBookingModel.findOne({ paymentId });
       if (!findBooking) throw new Error("No Booking Found on this Payment Id", paymentId);
 
       findBooking.bookingCancelReason = cancelReason;
@@ -234,11 +235,40 @@ export class HostRepository {
     }
   }
 
-async getWalletInfo(hostId) {
-  try {
-    return await HostWalletModel.findOne({hostId});
-  } catch (error) {
-    console.log(error.message);
+  async getWalletInfo(hostId) {
+    try {
+      return await HostWalletModel.findOne({ hostId });
+    } catch (error) {
+      console.log(error.message);
+    }
   }
-}
+
+  async sendMessageToAdmin(from, msg, to) {
+    try {
+      return await MessageModel.create({
+        msgFrom: from,
+        message: msg,
+        msgTo: to
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async getAdminMessages(hostEmail) {
+    try {
+      return await MessageModel.aggregate([
+        {
+          $match: {
+            $or: [
+              { msgFrom: hostEmail },
+              { msgTo: hostEmail }
+            ]
+          }
+        }
+      ])
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 }

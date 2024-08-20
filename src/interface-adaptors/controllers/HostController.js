@@ -3,6 +3,7 @@ import {
   sendHostApprovalMail,
   sendHostRejectionMail,
 } from "../../frameworks-and-drivers/external-lib/emailService.js";
+import {getReceiverSocketId, io} from "../../socket.js"
 import { uploadImages } from "../../frameworks-and-drivers/external-lib/imageUpload.js";
 import { passwordHashing } from "../../frameworks-and-drivers/external-lib/passwordHashing.js";
 
@@ -187,7 +188,7 @@ export default class HostController {
       await sendHostRejectionMail(email, rejectMsg);
       console.log(error.message);
       res.status(400).json({ error: error.message });
-    } catch (error) {}
+    } catch (error) { }
   }
 
   async getAllHosts(req, res) {
@@ -402,7 +403,40 @@ export default class HostController {
       res.status(200).json(wallet);
     } catch (error) {
       console.log(error.message);
-      res.status(400).json({error: error.message});
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async sendMessageToAdmin(req, res) {
+    const admin = "admin@gmail.com";
+    const hostEmail = req.hostDetails.email;
+    const { message } = req.body;
+    
+    try {
+      const sending = await this.hostUseCase.sendMessageToAdmin(hostEmail, message, admin);
+      const receiverId = await getReceiverSocketId(admin);
+
+      if (receiverId) {
+        io.to(receiverId).emit("newMessage", message);
+      }
+
+      console.log(hostEmail, "send message to", receiverId);
+      res.status(200).json(sending);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async getAdminMessages(req, res) {
+    const hostEmail = req.hostDetails.email;
+    try {
+      const messages = await this.hostUseCase.getAdminMessages(hostEmail);
+      console.log(hostEmail, "fetched admin messages");
+      res.status(200).json(messages);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
     }
   }
 }

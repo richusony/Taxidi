@@ -23,6 +23,8 @@ import { BrandRepository } from "../../../interface-adaptors/repositories/BrandR
 import { VehicleController } from "../../../interface-adaptors/controllers/VehicleController.js";
 import { VehicleRepository } from "../../../interface-adaptors/repositories/VehicleRepository.js";
 import AdminLoginController from "../../../interface-adaptors/controllers/AdminLoginController.js";
+import { AdminMessages } from "../../../use-cases/AdminMessages.js";
+import { AdminController } from "../../../interface-adaptors/controllers/AdminController.js";
 
 const router = express.Router();
 
@@ -223,6 +225,20 @@ router.get("/hosts", adminProtectRoute, verifyRole("admin"), (req, res) => {
   const hostController = new HostController(hostUseCase);
 
   hostController.getAllHosts(req, res);
+});
+
+router.post("/send-message", adminProtectRoute, verifyRole("admin"), (req, res) => {
+  const adminUseCase = new AdminMessages(adminRepository);
+  const adminController = new AdminController(adminUseCase);
+  
+  adminController.sendMessageToHost(req, res);
+});
+
+router.get("/get-messages/:email", adminProtectRoute, verifyRole("admin"), (req, res) => {
+  const adminUseCase = new AdminMessages(adminRepository);
+  const adminController = new AdminController(adminUseCase);
+  
+  adminController.getHostMessages(req, res);
 });
 
 router.post("/refresh-token", (req, res) =>
