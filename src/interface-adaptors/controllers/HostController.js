@@ -3,6 +3,7 @@ import {
   sendHostApprovalMail,
   sendHostRejectionMail,
 } from "../../frameworks-and-drivers/external-lib/emailService.js";
+import {getReceiverSocketId, io} from "../../socket.js"
 import { uploadImages } from "../../frameworks-and-drivers/external-lib/imageUpload.js";
 import { passwordHashing } from "../../frameworks-and-drivers/external-lib/passwordHashing.js";
 
@@ -413,7 +414,13 @@ export default class HostController {
     
     try {
       const sending = await this.hostUseCase.sendMessageToAdmin(hostEmail, message, admin);
-      console.log(hostEmail, "send message to", admin);
+      const receiverId = await getReceiverSocketId(admin);
+
+      if (receiverId) {
+        io.to(receiverId).emit("newMessage", message);
+      }
+
+      console.log(hostEmail, "send message to", receiverId);
       res.status(200).json(sending);
     } catch (error) {
       console.log(error.message);

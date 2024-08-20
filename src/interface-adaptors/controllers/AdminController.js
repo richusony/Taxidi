@@ -1,3 +1,5 @@
+import { getReceiverSocketId, io } from "../../socket.js";
+
 export class AdminController {
     constructor(adminUseCase) {
         this.adminUseCase = adminUseCase;
@@ -9,7 +11,14 @@ export class AdminController {
 
         try {
             const sending = await this.adminUseCase.sendMessage(to, msgFrom, message);
-            console.log("admin sent a message to", to);
+            console.log("tesing to", to);
+            const receiverId = await getReceiverSocketId(to);
+
+            if (receiverId) {
+                io.to(receiverId).emit("newMessage", message);
+            }
+
+            console.log("admin sent a message to", receiverId);
             res.status(200).json(sending);
         } catch (error) {
             console.log(error.message);

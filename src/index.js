@@ -3,13 +3,14 @@ dotenv.config();
 import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser";
+import { app, server } from "./socket.js";
 
 import userRoutes from "./frameworks-and-drivers/express/routes/userRoutes.js";
 import hostRoutes from "./frameworks-and-drivers/express/routes/hostRoutes.js";
 import adminRoutes from "./frameworks-and-drivers/express/routes/adminRoutes.js";
 import { connectMongoDB } from "./frameworks-and-drivers/database/mongoose/connection.js";
 
-const app = express();
+// const app = express();
 const PORT = process.env.PORT || 8080;
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -52,6 +53,6 @@ app.use("/host", hostRoutes);
 
 
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log("listening on port :", PORT, "ON :", process.env.NODE_ENV);
 });
