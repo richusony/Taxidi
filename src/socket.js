@@ -1,6 +1,6 @@
-import { Server } from "socket.io";
 import http from "http";
 import express from "express";
+import { Server } from "socket.io";
 // import { joinRooms } from "../utils/JoinRooms.js";
 
 const app = express();
@@ -14,6 +14,7 @@ const io = new Server(server, {
 });
 
 export const getReceiverSocketId = (receiverId) => {
+  console.log("id collections :: ",userSocketMap);
   return userSocketMap[receiverId];
 };
 

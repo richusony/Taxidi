@@ -1,7 +1,8 @@
 import { UserModel } from "../../frameworks-and-drivers/database/mongoose/models/UserModel.js";
 import UserWalletModel from "../../frameworks-and-drivers/database/mongoose/models/UserWallet.js";
-import { LicenseVerifyModel } from "../../frameworks-and-drivers/database/mongoose/models/UserLicenseVerifyModel.js";
 import UserTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/UserPaymentHistory.js";
+import UserNotificationModel from "../../frameworks-and-drivers/database/mongoose/models/UserNotificationModel.js";
+import { LicenseVerifyModel } from "../../frameworks-and-drivers/database/mongoose/models/UserLicenseVerifyModel.js";
 
 export class UserRepository {
   async save(user) {
@@ -68,6 +69,12 @@ export class UserRepository {
       const removeRequest = await LicenseVerifyModel.findOneAndDelete({
         licenseNumber,
       });
+
+      const addToNotifications = await UserNotificationModel.create({
+        context: "Your license has been approved. Enjoy booking",
+        userId
+      });
+
       return updateUser;
     } catch (error) {
       console.error("Error uploading and saving license:", error);
@@ -107,7 +114,7 @@ export class UserRepository {
     paymentMethod,
     paymentMessage,
   ) {
-    console.log("userRep",userId, paymentId, amount, paymentMethod, paymentMessage);
+    console.log("userRep", userId, paymentId, amount, paymentMethod, paymentMessage);
     try {
       const addToWallet = await UserWalletModel.updateOne(
         { userId },
@@ -131,9 +138,17 @@ export class UserRepository {
     }
   }
 
-  async getWallet(userId){
+  async getWallet(userId) {
     try {
-      return await UserWalletModel.findOne({userId});
+      return await UserWalletModel.findOne({ userId });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async getAllUserNotifications(userId) {
+    try {
+      return await UserNotificationModel.find({ userId }).sort({ createdAt: -1 })
     } catch (error) {
       console.log(error.message);
     }

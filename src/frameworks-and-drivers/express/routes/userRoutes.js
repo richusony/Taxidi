@@ -7,6 +7,7 @@ import { UpdateUser } from "../../../use-cases/UpdateUser.js";
 import { CreateBrand } from "../../../use-cases/CreateBrand.js";
 import { UserUseCase } from "../../../use-cases/UserUseCase.js";
 import { BookingUseCase } from "../../../use-cases/BookingUseCase.js";
+import { UserNotifications } from "../../../use-cases/UserNotifications.js";
 import { UserWalletUseCase } from "../../../use-cases/UserWalletUseCase.js";
 import { VehicleReviewUseCase } from "../../../use-cases/VehicleReviewUseCase.js";
 import { OtpController } from "../../../interface-adaptors/controllers/OtpController.js";
@@ -165,19 +166,12 @@ router.get("/wallet", protectRoute, verifyRole("user"), (req, res) => {
   userController.getWallet(req, res);
 });
 
-router.post("/refresh-token", (req, res) =>
-  loginController.userRefreshToken(req, res),
-);
-
-router.get("/logout", protectRoute, verifyRole("user"), (req, res) => {
-  loginController.logout(req, res);
-});
 
 router.get("/bookings", protectRoute, verifyRole("user"), (req, res) => {
   const hostRepository = new HostRepository();
   const useCse = new UserUseCase(hostRepository);
   const userController = new UserController(useCse);
-
+  
   userController.getAllBookings(req, res);
 });
 
@@ -185,8 +179,22 @@ router.get("/booking-details/:paymentId", protectRoute, verifyRole("user"), (req
   const hostRepository = new HostRepository();
   const useCse = new UserUseCase(hostRepository);
   const userController = new UserController(useCse);
-
+  
   userController.getBookingDetails(req, res);
 });
 
+router.get("/notifications", protectRoute, verifyRole("user"), (req, res) => {
+  const useCase = new UserNotifications(userRepository);
+  const userController = new UserController(useCase);
+
+  userController.getAllNotifications(req, res);
+});
+
+router.post("/refresh-token", (req, res) =>
+  loginController.userRefreshToken(req, res),
+);
+
+router.get("/logout", protectRoute, verifyRole("user"), (req, res) => {
+  loginController.logout(req, res);
+});
 export default router;

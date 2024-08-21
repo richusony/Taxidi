@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import Razorpay from "razorpay";
+import { getReceiverSocketId, io } from "../../socket.js";
 
 export class UserController {
   constructor(userUseCase) {
@@ -141,6 +142,12 @@ export class UserController {
         licenseFrontImage,
         licenseBackImage,
       );
+      const receiverId = await getReceiverSocketId(userId._id);
+
+      if (receiverId) {
+        io.to(receiverId).emit("notify", "Your license has been approved. Happy Booking");
+      }
+
       console.log("saved user license");
       res.status(200).json(saveLicense);
     } catch (error) {
@@ -230,7 +237,7 @@ export class UserController {
         queryEndDate,
         verifyPayment,
       );
-      console.log("booking of vehicle :",vehicleId,"by",userId, "has been successfull");
+      console.log("booking of vehicle :", vehicleId, "by", userId, "has been successfull");
       res.status(200);
     } catch (error) {
       console.log(error.message);
@@ -305,7 +312,7 @@ export class UserController {
     // console.log(req.body);
     try {
       const vehicleReviews = await this.userUseCase.getVehicleReviewsAndRating(vehicleRegistrationNumber);
-      console.log("fetched vehicle reviews of ",vehicleRegistrationNumber);
+      console.log("fetched vehicle reviews of ", vehicleRegistrationNumber);
       res.status(200).json(vehicleReviews);
     } catch (error) {
       console.log(error.message);
@@ -346,6 +353,18 @@ export class UserController {
     } catch (error) {
       console.log(error.message);
       res.status(400).status({ error: error.message });
-    } 
+    }
+  }
+
+  async getAllNotifications(req, res) {
+    const userId = req.user._id;
+    try {
+      const notifications = await this.userUseCase.getAllUserNotifications(userId);
+      console.log("fetched user notifications");
+      res.status(200).json(notifications);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).status({ error: error.message });
+    }
   }
 }
