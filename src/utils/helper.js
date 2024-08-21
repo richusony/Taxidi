@@ -37,3 +37,17 @@ export const generateAccessToken = (userId, email) => {
   // console.log("Access Token :: ",accessToken);
   return accessToken;
 };
+
+export const generatePaymentIdString = (prefix, length) => {
+  // Define characters to use for generating the random string
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = prefix;
+  
+  // Generate random characters and append them to the result string
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters[randomIndex];
+  }
+
+  return result;
+};

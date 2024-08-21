@@ -3,7 +3,7 @@ import {
   sendHostApprovalMail,
   sendHostRejectionMail,
 } from "../../frameworks-and-drivers/external-lib/emailService.js";
-import {getReceiverSocketId, io} from "../../socket.js"
+import { getReceiverSocketId, io } from "../../socket.js"
 import { uploadImages } from "../../frameworks-and-drivers/external-lib/imageUpload.js";
 import { passwordHashing } from "../../frameworks-and-drivers/external-lib/passwordHashing.js";
 
@@ -411,7 +411,7 @@ export default class HostController {
     const admin = "admin@gmail.com";
     const hostEmail = req.hostDetails.email;
     const { message } = req.body;
-    
+
     try {
       const sending = await this.hostUseCase.sendMessageToAdmin(hostEmail, message, admin);
       const receiverId = await getReceiverSocketId(admin);
@@ -434,6 +434,44 @@ export default class HostController {
       const messages = await this.hostUseCase.getAdminMessages(hostEmail);
       console.log(hostEmail, "fetched admin messages");
       res.status(200).json(messages);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async updateVehilce(req, res) {
+    try {
+      const {
+        vehicleId,
+        mileage,
+        seats,
+        color,
+        rent,
+        city,
+        pincode,
+        pickUpLocation,
+        latitude,
+        longitude,
+        lastServiceDate,
+        locationText
+      } = req.body;
+
+      const update = await this.hostUseCase.updateVehicle(
+        vehicleId,
+        mileage,
+        seats,
+        color,
+        rent,
+        city,
+        pincode,
+        pickUpLocation,
+        latitude,
+        longitude,
+        lastServiceDate,
+        locationText);
+      console.log(update?.model, "vehilce updated");
+      res.status(200).json(update);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });

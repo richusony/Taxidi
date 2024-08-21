@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import VehicleBookingModel from "../../frameworks-and-drivers/database/mongoose/models/VehicleBookingModel.js";
 import { VehicleModel } from "../../frameworks-and-drivers/database/mongoose/models/VehicleModel.js";
 import VehicleRatingModel from "../../frameworks-and-drivers/database/mongoose/models/vehicleRatingModel.js";
@@ -59,7 +60,7 @@ export class VehicleRepository {
     return await VehicleModel.find({}).populate(["host", "brand", "bodyType"]);
   }
 
-  async getAllAvailableCars(bookingStartsString, bookingEndsString) {
+  async getAllAvailableCars( brand, bodyType, fuel, priceRange, bookingStartsString, bookingEndsString) {
     const bookingStarts = new Date(`${bookingStartsString}:00Z`); // Appending seconds and time zone
     const bookingEnds = new Date(`${bookingEndsString}:00Z`);
     try {
@@ -87,7 +88,7 @@ export class VehicleRepository {
   
       // Extract vehicle IDs from the aggregation result
       const vehicleIds = bookedVehicleIds.length > 0 ? bookedVehicleIds[0].vehicleIds : [];
-      console.log(bookedVehicleIds);
+      console.log("bookedIds::",bookedVehicleIds);
       // Step 2: Find vehicles not in the list of booked vehicle IDs
       const availableCars = await VehicleModel.find({
         _id: { $nin: vehicleIds }

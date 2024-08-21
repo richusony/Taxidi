@@ -26,4 +26,8 @@ export class UserWalletUseCase {
       console.log(error.message);
     }
   }
+
+  async getWalletHistory(userId) {
+    return await this.userRepository.getWalletHistory(userId);
+  }
 }

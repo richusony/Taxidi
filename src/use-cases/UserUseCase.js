@@ -3,8 +3,22 @@ export class UserUseCase {
         this.repository = repository;
     }
 
-    async getAllAvailableCars(bookingStarts, bookingEnds) {
-        return await this.repository.getAllAvailableCars(bookingStarts, bookingEnds)
+    async getAllAvailableCars(
+        brand,
+        bodyType,
+        fuel,
+        priceRange,
+        bookingStarts,
+        bookingEnds
+    ) {
+        return await this.repository.getAllAvailableCars(
+            brand,
+            bodyType,
+            fuel,
+            priceRange,
+            bookingStarts,
+            bookingEnds
+        );
     }
 
     async getCarDetails(vehicleRegistrationNumber) {
@@ -15,7 +29,11 @@ export class UserUseCase {
         return await this.repository.getAllUserBookings(userId);
     }
 
-    async getBookingDetails(paymentId){
+    async getBookingDetails(paymentId) {
         return await this.repository.getBookingDetails(paymentId);
+    }
+
+    async cancelBooking(paymentId) {
+        return await this.repository.cancelBooking(paymentId);
     }
 }

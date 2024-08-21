@@ -20,6 +20,7 @@ import { BrandRepository } from "../../../interface-adaptors/repositories/BrandR
 import { AdminRepository } from "../../../interface-adaptors/repositories/AdminRepository.js";
 import { VehicleRepository } from "../../../interface-adaptors/repositories/VehicleRepository.js";
 import UserProfileController from "../../../interface-adaptors/controllers/UserProfileController.js";
+import { GetAllBodyTypes } from "../../../use-cases/getAllBodyTypes.js";
 
 const router = express.Router();
 
@@ -75,6 +76,12 @@ router.post(
 
 router.get("/brands", (req, res) => {
   brandController.getAllBrands(req, res);
+});
+
+router.get("/body-types", (req, res) => {
+  const useCase = new GetAllBodyTypes(userRepository);
+  const userController = new UserController(useCase);
+  userController.getAllBodyTypes(req, res);
 });
 
 router.get("/get-available-cars", (req, res) => {
@@ -166,12 +173,19 @@ router.get("/wallet", protectRoute, verifyRole("user"), (req, res) => {
   userController.getWallet(req, res);
 });
 
+router.get("/wallet-history", protectRoute, verifyRole("user"), (req, res)=> {
+const useCase = new UserWalletUseCase(userRepository);
+const userController = new UserController(useCase);
+
+userController.getWalletHistory(req, res);
+});
+
 
 router.get("/bookings", protectRoute, verifyRole("user"), (req, res) => {
   const hostRepository = new HostRepository();
   const useCse = new UserUseCase(hostRepository);
   const userController = new UserController(useCse);
-  
+
   userController.getAllBookings(req, res);
 });
 
@@ -179,8 +193,15 @@ router.get("/booking-details/:paymentId", protectRoute, verifyRole("user"), (req
   const hostRepository = new HostRepository();
   const useCse = new UserUseCase(hostRepository);
   const userController = new UserController(useCse);
-  
+
   userController.getBookingDetails(req, res);
+});
+
+router.post("/cancel-booking", protectRoute, verifyRole("user"), (req, res) => {
+  const useCase = new UserUseCase(userRepository);
+  const userController = new UserController(useCase);
+
+  userController.cancelVehicleBooking(req, res);
 });
 
 router.get("/notifications", protectRoute, verifyRole("user"), (req, res) => {

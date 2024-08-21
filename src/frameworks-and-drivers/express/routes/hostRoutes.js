@@ -113,6 +113,13 @@ router.get("/get-messages", hostProtectedRoute, verifyRole("host"), (req, res) =
   hostController.getAdminMessages(req, res);
 });
 
+router.patch("/update-vehicle", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const useCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(useCase);
+
+  hostController.updateVehilce(req, res);
+});
+
 router.post("/refresh-token", (req, res) => {
   const hostUseCase = new HostLogin(hostRepository);
   const hostController = new HostController(hostUseCase);

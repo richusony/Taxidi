@@ -42,7 +42,7 @@ const bookingSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    bookinStatus: {
+    bookingStatus: {
       type:Boolean,
       default:true
     },

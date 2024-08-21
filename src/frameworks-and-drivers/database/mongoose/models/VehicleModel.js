@@ -62,6 +62,18 @@ const vehicleSchema = new mongoose.Schema(
     },
     rent: {
       type: Number
+    },
+    longitude: {
+      type: Number
+    },
+    latitude: {
+      type: Number
+    },
+    locationText: {
+      type: String
+    },
+    lastServiceDate: {
+      type: String
     }
   },
   { timestamps: true }

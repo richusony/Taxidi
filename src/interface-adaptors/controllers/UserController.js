@@ -157,7 +157,8 @@ export class UserController {
   }
 
   async getAllAvailableCars(req, res) {
-    const { bookingStarts, bookingEnds } = req.query;
+    const { brand, bodyType, fuel, priceRange, bookingStarts, bookingEnds } = req.query;
+    // console.log("query::",req.query)
     if (!bookingStarts || !bookingEnds) {
       return res
         .status(400)
@@ -166,6 +167,10 @@ export class UserController {
 
     try {
       const availableCars = await this.userUseCase.getAllAvailableCars(
+        brand,
+        bodyType,
+        fuel,
+        priceRange,
         bookingStarts,
         bookingEnds,
       );
@@ -362,6 +367,47 @@ export class UserController {
       const notifications = await this.userUseCase.getAllUserNotifications(userId);
       console.log("fetched user notifications");
       res.status(200).json(notifications);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).status({ error: error.message });
+    }
+  }
+
+  async getAllBodyTypes(req, res) {
+    try {
+      const bodyTypes = await this.userUseCase.getAllBodyTypes();
+      res.status(200).json(bodyTypes);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).status({ error: error.message });
+    }
+  }
+
+  async getWalletHistory(req, res) {
+    const userId = req.user._id;
+    try {
+      const walletHistory = await this.userUseCase.getWalletHistory(userId);
+      console.log("fetched user wallet History");
+      res.status(200).json(walletHistory);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).status({ error: error.message });
+    }
+  }
+
+  async cancelVehicleBooking(req, res) {
+    const userId = req.user._id;
+    const { paymentId } = req.body;
+    try {
+      const cancelBooking = await this.userUseCase.cancelBooking(paymentId);
+      const receiverId = await getReceiverSocketId(userId);
+
+      if (receiverId) {
+        io.to(receiverId).emit("notify", "Booking has been cancelled. Amount will be credited to your wallet soon.");
+      }
+
+      console.log("booking cancelled of ", paymentId);
+      res.status(200).json(cancelBooking);
     } catch (error) {
       console.log(error.message);
       res.status(400).status({ error: error.message });

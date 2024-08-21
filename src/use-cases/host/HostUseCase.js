@@ -1,4 +1,4 @@
-export class HostUseCase{
+export class HostUseCase {
     constructor(hostRepository) {
         this.hostRepository = hostRepository;
     }
@@ -27,5 +27,34 @@ export class HostUseCase{
 
     async getWalletInfo(hostId) {
         return await this.hostRepository.getWalletInfo(hostId);
+    }
+
+    async updateVehicle(
+        vehicleId,
+        mileage,
+        seats,
+        color,
+        rent,
+        city,
+        pincode,
+        pickUpLocation,
+        latitude,
+        longitude,
+        lastServiceDate,
+        locationText
+    ) {
+        return await this.hostRepository.updateVehicle(
+            vehicleId,
+            mileage,
+            seats,
+            color,
+            rent,
+            city,
+            pincode,
+            pickUpLocation,
+            latitude,
+            longitude,
+            lastServiceDate,
+            locationText);
     }
 }

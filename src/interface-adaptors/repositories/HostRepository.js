@@ -271,4 +271,36 @@ export class HostRepository {
       console.log(error.message);
     }
   }
+
+  async updateVehicle(
+    vehicleId,
+    mileage,
+    seats,
+    color,
+    rent,
+    city,
+    pincode,
+    pickUpLocation,
+    latitude,
+    longitude,
+    lastServiceDate,
+    locationText) {
+    try {
+      return await VehicleModel.findByIdAndUpdate({ _id: vehicleId }, {
+        mileage,
+        seats,
+        color,
+        rent,
+        city,
+        pincode,
+        pickUpLocation,
+        latitude,
+        longitude,
+        lastServiceDate,
+        locationText
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 }
