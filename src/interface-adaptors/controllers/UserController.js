@@ -387,7 +387,7 @@ export class UserController {
     const userId = req.user._id;
     try {
       const walletHistory = await this.userUseCase.getWalletHistory(userId);
-      console.log("fetched user wallet History");
+      console.log("fetched user wallet History", walletHistory);
       res.status(200).json(walletHistory);
     } catch (error) {
       console.log(error.message);
