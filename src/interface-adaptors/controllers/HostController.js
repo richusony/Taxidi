@@ -417,7 +417,7 @@ export default class HostController {
       const receiverId = await getReceiverSocketId(admin);
 
       if (receiverId) {
-        io.to(receiverId).emit("newMessage", message);
+        io.to(receiverId).emit("newMessage", sending);
       }
 
       console.log(hostEmail, "send message to", receiverId);

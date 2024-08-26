@@ -10,7 +10,7 @@ export class CreateBrand{
 
         brand.validate()
 
-        return this.brandRepository.save(brand)
+        return this.brandRepository.save(brand);
     }
 
     async getBrands() {

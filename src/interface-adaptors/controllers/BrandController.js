@@ -14,6 +14,7 @@ export class BrandController {
       const brand = await this.brandUseCase.execute(brandName.toUpperCase(), brandImage);
       res.status(201).json(brand);
     } catch (error) {
+      console.log(error.message);
       res.status(400).json({ error: error.message });
     }
   }

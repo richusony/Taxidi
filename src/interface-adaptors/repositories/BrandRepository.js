@@ -2,9 +2,9 @@ import { BrandModel } from "../../frameworks-and-drivers/database/mongoose/model
 
 export class BrandRepository {
   async save(brand) {
-    const alreadyExistsBrand = await BrandModel.findOne({ brandName: brand.toUpperCase() });
+    const alreadyExistsBrand = await BrandModel.findOne({ brandName: brand.brandName });
     if (alreadyExistsBrand) {
-      throw new Error(brand, "already exists");
+      throw new Error("already exists");
     }
 
     const brandModel = new BrandModel({

@@ -15,7 +15,7 @@ export class AdminController {
             const receiverId = await getReceiverSocketId(to);
 
             if (receiverId) {
-                io.to(receiverId).emit("newMessage", message);
+                io.to(receiverId).emit("newMessage", sending);
             }
 
             console.log("admin sent a message to", receiverId);
