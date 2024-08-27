@@ -1,12 +1,13 @@
 import HostModel from "../../frameworks-and-drivers/database/mongoose/models/HostModel.js";
 import { BodyModel } from "../../frameworks-and-drivers/database/mongoose/models/BodyModel.js";
 import { BrandModel } from "../../frameworks-and-drivers/database/mongoose/models/BrandModel.js";
+import MessageModel from "../../frameworks-and-drivers/database/mongoose/models/MessageModel.js";
 import HostWalletModel from "../../frameworks-and-drivers/database/mongoose/models/HostWallet.js";
 import { VehicleModel } from "../../frameworks-and-drivers/database/mongoose/models/VehicleModel.js";
 import HostRequestModel from "../../frameworks-and-drivers/database/mongoose/models/HostRequestModel.js";
+import UserNotification from "../../frameworks-and-drivers/database/mongoose/models/UserNotificationModel.js";
 import HostTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/HostPaymentHistory.js";
 import VehicleBookingModel from "../../frameworks-and-drivers/database/mongoose/models/VehicleBookingModel.js";
-import MessageModel from "../../frameworks-and-drivers/database/mongoose/models/MessageModel.js";
 
 export class HostRepository {
   async saveHost(host) {
@@ -227,11 +228,21 @@ export class HostRepository {
       const findBooking = await VehicleBookingModel.findOne({ paymentId });
       if (!findBooking) throw new Error("No Booking Found on this Payment Id", paymentId);
 
+      if (findBooking.bookingStatus === false) throw new Error("Booking already cancelled", paymentId);
+
       findBooking.bookingCancelReason = cancelReason;
-      findBooking.bookinStatus = false;
-      return await findBooking.save();
+      findBooking.bookingStatus = false;
+      const booking = await findBooking.save();
+
+      await UserNotification.create({
+        context: cancelReason,
+        userId: findBooking.paidBy
+      });
+
+      return booking;
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 

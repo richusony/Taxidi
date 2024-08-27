@@ -14,7 +14,7 @@ const io = new Server(server, {
 });
 
 export const getReceiverSocketId = (receiverId) => {
-  console.log("id collections :: ",userSocketMap);
+  // console.log("id collections :: ",userSocketMap);
   return userSocketMap[receiverId];
 };
 
@@ -29,29 +29,29 @@ io.on("connection", (socket) => {
   if (userId !== "undefined") userSocketMap[userId] = socket.id;
 
   // emit is used to send events to all the connected clients
-  io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  // io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-  socket.on("userTyping", (data) => {
-  const receiverSocketId = getReceiverSocketId(data.receiverId);
-  if (receiverSocketId) {
-    io.to(receiverSocketId).emit("userIsTyping", data.message);
-  }
-});
+  // socket.on("userTyping", (data) => {
+  //   const receiverSocketId = getReceiverSocketId(data.receiverId);
+  //   if (receiverSocketId) {
+  //     io.to(receiverSocketId).emit("userIsTyping", data.message);
+  //   }
+  // });
 
-// joinRooms(socket, userId);
+  // joinRooms(socket, userId);
 
-socket.on("userStoppedTyping", (data) => {
-  const receiverSocketId = getReceiverSocketId(data.receiverId);
-  if (receiverSocketId) {
-    io.to(receiverSocketId).emit("userStoppedTyping");
-  }
-});
+  // socket.on("userStoppedTyping", (data) => {
+  //   const receiverSocketId = getReceiverSocketId(data.receiverId);
+  //   if (receiverSocketId) {
+  //     io.to(receiverSocketId).emit("userStoppedTyping");
+  //   }
+  // });
 
 
   socket.on("disconnect", () => {
     console.log("user disconnected", socket.id);
     delete userSocketMap[userId];
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    // io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });
 

@@ -388,6 +388,13 @@ export default class HostController {
         cancelReason,
       );
       console.log("Booking Cancelled of Payment Id", paymentId, "By Host");
+      const receiverId = await getReceiverSocketId(cancelling?.paidBy);
+
+      if (receiverId) {
+        io.to(receiverId).emit("notify", cancelReason);
+        console.log("booking cancel notification send to user", receiverId);
+      }
+
       res.status(200).json(cancelling);
     } catch (error) {
       console.log(error.message);

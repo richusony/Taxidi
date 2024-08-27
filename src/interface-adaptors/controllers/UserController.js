@@ -143,7 +143,7 @@ export class UserController {
         licenseBackImage,
       );
       const receiverId = await getReceiverSocketId(userId._id);
-
+      console.log(receiverId);
       if (receiverId) {
         io.to(receiverId).emit("notify", "Your license has been approved. Happy Booking");
       }

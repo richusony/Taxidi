@@ -9,6 +9,7 @@ import { brandParser, parser } from "../../external-lib/multer.js";
 import { CreateHost } from "../../../use-cases/host/CreateHost.js";
 import { DeleteVehicle } from "../../../use-cases/DeleteVehicle.js";
 import adminProtectRoute from "../middlewares/adminProtectRoute.js";
+import { AdminMessages } from "../../../use-cases/AdminMessages.js";
 import { GetAllVehicles } from "../../../use-cases/GetAllVehicles.js";
 import { HostRequestUseCase } from "../../../use-cases/host/HostRequest.js";
 import HostController from "../../../interface-adaptors/controllers/HostController.js";
@@ -18,13 +19,12 @@ import { UserRepository } from "../../../interface-adaptors/repositories/UserRep
 import { HostRepository } from "../../../interface-adaptors/repositories/HostRepository.js";
 import { BodyRepository } from "../../../interface-adaptors/repositories/BodyRepository.js";
 import { BrandController } from "../../../interface-adaptors/controllers/BrandController.js";
+import { AdminController } from "../../../interface-adaptors/controllers/AdminController.js";
 import { AdminRepository } from "../../../interface-adaptors/repositories/AdminRepository.js";
 import { BrandRepository } from "../../../interface-adaptors/repositories/BrandRepository.js";
 import { VehicleController } from "../../../interface-adaptors/controllers/VehicleController.js";
 import { VehicleRepository } from "../../../interface-adaptors/repositories/VehicleRepository.js";
 import AdminLoginController from "../../../interface-adaptors/controllers/AdminLoginController.js";
-import { AdminMessages } from "../../../use-cases/AdminMessages.js";
-import { AdminController } from "../../../interface-adaptors/controllers/AdminController.js";
 
 const router = express.Router();
 
@@ -230,19 +230,19 @@ router.get("/hosts", adminProtectRoute, verifyRole("admin"), (req, res) => {
 router.post("/send-message", adminProtectRoute, verifyRole("admin"), (req, res) => {
   const adminUseCase = new AdminMessages(adminRepository);
   const adminController = new AdminController(adminUseCase);
-  
+
   adminController.sendMessageToHost(req, res);
 });
 
 router.get("/get-messages/:email", adminProtectRoute, verifyRole("admin"), (req, res) => {
   const adminUseCase = new AdminMessages(adminRepository);
   const adminController = new AdminController(adminUseCase);
-  
+
   adminController.getHostMessages(req, res);
 });
 
 router.post("/refresh-token", (req, res) =>
-  adminController.adminRefreshToken(req, res),
+  adminController.adminRefreshToken(req, res)
 );
 
 router.get("/logout", adminProtectRoute, verifyRole("admin"), (req, res) =>
