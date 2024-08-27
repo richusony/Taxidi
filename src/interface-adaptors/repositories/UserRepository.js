@@ -141,6 +141,7 @@ export class UserRepository {
       return addToWallet;
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -149,6 +150,7 @@ export class UserRepository {
       return await UserWalletModel.findOne({ userId });
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -157,6 +159,7 @@ export class UserRepository {
       return await UserNotificationModel.find({ userId }).sort({ createdAt: -1 })
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -165,6 +168,7 @@ export class UserRepository {
       return await BodyModel.find({});
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -173,6 +177,7 @@ export class UserRepository {
       return await UserTransactionModel.find({ userId, paymentMethod: "wallet" });
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -194,7 +199,7 @@ export class UserRepository {
       if (bookingStarts <= date) {
         throw new Error("Can't cancel booking at or after the trip starting date");
       }
-      
+
       const cancellBooking = await VehicleBookingModel.findOneAndUpdate({ paymentId }, { bookingStatus: false });
       const totalAmount = cancellBooking.totalAmount;
       const commissionToAdmin = cancellBooking.commissionToAdmin;
@@ -215,8 +220,16 @@ export class UserRepository {
         userId: cancellBooking.paidBy,
         credited: true
       });
+
+      await UserNotificationModel.create({
+        context:`Booking has been cancelled. ${totalAmount} credited to your wallet`,
+        userId: cancellBooking.paidBy
+      });
+      
+      return cancellBooking;
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 }

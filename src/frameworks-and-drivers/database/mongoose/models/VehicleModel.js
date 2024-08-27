@@ -74,6 +74,10 @@ const vehicleSchema = new mongoose.Schema(
     },
     lastServiceDate: {
       type: String
+    },
+    availabilityStatus: {
+      type: Boolean,
+      default: true
     }
   },
   { timestamps: true }

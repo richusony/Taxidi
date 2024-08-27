@@ -9,7 +9,9 @@ export class UserUseCase {
         fuel,
         priceRange,
         bookingStarts,
-        bookingEnds
+        bookingEnds,
+        latitude,
+        longitude
     ) {
         return await this.repository.getAllAvailableCars(
             brand,
@@ -17,7 +19,9 @@ export class UserUseCase {
             fuel,
             priceRange,
             bookingStarts,
-            bookingEnds
+            bookingEnds,
+            latitude,
+            longitude
         );
     }
 

@@ -60,7 +60,7 @@ export class VehicleRepository {
     return await VehicleModel.find({}).populate(["host", "brand", "bodyType"]);
   }
 
-  async getAllAvailableCars( brand, bodyType, fuel, priceRange, bookingStartsString, bookingEndsString) {
+  async getAllAvailableCars( brand, bodyType, fuel, priceRange, bookingStartsString, bookingEndsString, latitude, longitude) {
     const bookingStarts = new Date(`${bookingStartsString}:00Z`); // Appending seconds and time zone
     const bookingEnds = new Date(`${bookingEndsString}:00Z`);
     try {

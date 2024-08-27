@@ -157,8 +157,8 @@ export class UserController {
   }
 
   async getAllAvailableCars(req, res) {
-    const { brand, bodyType, fuel, priceRange, bookingStarts, bookingEnds } = req.query;
-    // console.log("query::",req.query)
+    const { brand, bodyType, fuel, priceRange, bookingStarts, bookingEnds, latitude, longitude } = req.query;
+    console.log("query::", req.query)
     if (!bookingStarts || !bookingEnds) {
       return res
         .status(400)
@@ -173,6 +173,8 @@ export class UserController {
         priceRange,
         bookingStarts,
         bookingEnds,
+        latitude,
+        longitude
       );
       // console.log(availableCars);
       console.log("fetched all available vechiles in", bookingStarts, "-", bookingEnds);
@@ -243,7 +245,7 @@ export class UserController {
         verifyPayment,
       );
       console.log("booking of vehicle :", vehicleId, "by", userId, "has been successfull");
-      res.status(200);
+      res.status(200).json(saveTransactions);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
@@ -403,7 +405,7 @@ export class UserController {
       const receiverId = await getReceiverSocketId(userId);
 
       if (receiverId) {
-        io.to(receiverId).emit("notify", "Booking has been cancelled. Amount will be credited to your wallet soon.");
+        io.to(receiverId).emit("notify", `Booking has been cancelled. ${cancelBooking.totalAmount} credited to your wallet`);
       }
 
       console.log("booking cancelled of ", paymentId);
