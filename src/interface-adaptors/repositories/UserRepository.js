@@ -9,6 +9,7 @@ import AdminWalletModel from "../../frameworks-and-drivers/database/mongoose/mod
 import AdminTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/AdminPaymentHistory.js";
 import HostWalletModel from "../../frameworks-and-drivers/database/mongoose/models/HostWallet.js";
 import { generatePaymentIdString } from "../../utils/helper.js";
+import HostTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/HostPaymentHistory.js";
 
 export class UserRepository {
   async save(user) {
@@ -186,6 +187,7 @@ export class UserRepository {
 
   async cancelBooking(paymentId) {
     const date = new Date();
+    const adminId = "668b183d01b691981bcaa102";
     try {
       const findBooking = await VehicleBookingModel.findOne({ paymentId });
       if (!findBooking) {
@@ -209,19 +211,44 @@ export class UserRepository {
       const balanceAfterCommission = cancellBooking.balanceAfterCommission;
 
       // reduce amount from both admin and host wallet
-      const adminWallet = await AdminWalletModel.findOneAndUpdate({ adminId: "668b183d01b691981bcaa102" }, { $inc: { balance: -commissionToAdmin } });
-      const hostWallet = await HostWalletModel.findOneAndUpdate({ hostId: cancellBooking.hostId }, { $inc: { balance: -balanceAfterCommission } });
+      await AdminWalletModel.findOneAndUpdate({ adminId }, { $inc: { balance: -commissionToAdmin } });
+      await HostWalletModel.findOneAndUpdate({ hostId: cancellBooking.hostId }, { $inc: { balance: -balanceAfterCommission } });
 
-      const userWallet = await UserWalletModel.findOneAndUpdate({ userId: cancellBooking.paidBy }, { $inc: { balance: totalAmount } });
+      await UserWalletModel.findOneAndUpdate({ userId: cancellBooking.paidBy }, { $inc: { balance: totalAmount } });
       const payId = await generatePaymentIdString("pay_", 8);
 
-      const userwalletHistory = await UserTransactionModel.create({
+      await UserTransactionModel.create({
         paymentId: payId,
         amount: totalAmount,
         paymentMessage: "Refund from cancelled booking",
         paymentMethod: "wallet",
         userId: cancellBooking.paidBy,
         credited: true
+      });
+
+      await AdminTransactionModel.create({
+        adminId,
+        balanceAfterCommission,
+        commissionToAdmin,
+        paidBy: cancellBooking.paidBy,
+        paymentId: payId,
+        totalAmount,
+        vehicleId: cancellBooking.vehicleId,
+        paymentMethod: "wallet",
+        credited: false
+      });
+
+      await HostTransactionModel.create({
+        adminId,
+        balanceAfterCommission,
+        commissionToAdmin,
+        paidBy: cancellBooking.paidBy,
+        paymentId: payId,
+        totalAmount,
+        hostId: cancellBooking.hostId,
+        vehicleId: cancellBooking.vehicleId,
+        paymentMethod: "wallet",
+        credited: false
       });
 
       await UserNotificationModel.create({

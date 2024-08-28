@@ -39,10 +39,8 @@ export class AdminRepository {
     paymentMethod,
   ) {
     try {
-      const addToWallet = await AdminWalletModel.create({
-        balance: balanceAfterCommission,
-        adminId: adminId,
-      });
+      const addToWallet = await AdminWalletModel.findOneAndUpdate({ adminId }, { $inc: { balance: commissionToAdmin } });
+
       const addToTransactions = await AdminTransactionModel.create({
         adminId: adminId,
         balanceAfterCommission: balanceAfterCommission,

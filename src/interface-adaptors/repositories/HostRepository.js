@@ -117,10 +117,10 @@ export class HostRepository {
     paymentMethod,
   ) {
     try {
-      const addToWallet = await HostWalletModel.create({
-        balance: balanceAfterCommission,
-        hostId: hostId,
+      const addToWallet = await HostWalletModel.findOneAndUpdate({ hostId }, {
+        $inc: { balance: balanceAfterCommission }
       });
+      
       const addToTransactions = await HostTransactionModel.create({
         balanceAfterCommission: balanceAfterCommission,
         commissionToAdmin: commissionToAdmin,
@@ -342,7 +342,7 @@ export class HostRepository {
   async listVehicle(vehicleId) {
     try {
       const findVehicle = await VehicleModel.findById(vehicleId);
-      if(!findVehicle) throw new Error("vehicle not found");
+      if (!findVehicle) throw new Error("vehicle not found");
 
       findVehicle.availabilityStatus = true;
       await findVehicle.save();
@@ -357,11 +357,11 @@ export class HostRepository {
   async unListVehicle(vehicleId) {
     try {
       const findVehicle = await VehicleModel.findById(vehicleId);
-      if(!findVehicle) throw new Error("vehicle not found");
+      if (!findVehicle) throw new Error("vehicle not found");
 
       findVehicle.availabilityStatus = false;
       await findVehicle.save();
-      
+
       return findVehicle;
     } catch (error) {
       console.log(error.message);

@@ -70,7 +70,8 @@ export class VehicleRepository {
         {
           $match: {
             bookingStarts: { $lte: bookingEnds },
-            bookingEnds: { $gte: bookingStarts }
+            bookingEnds: { $gte: bookingStarts },
+            bookingStatus: true
           }
         },
         {

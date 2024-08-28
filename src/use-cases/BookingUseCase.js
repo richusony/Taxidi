@@ -16,7 +16,7 @@ export class BookingUseCase {
     const ADMIN_COMMISSION = 20; // percetange
     const paymentId = paymentDetails.id;
     const paymentMethod = paymentDetails.method;
-    const totalAmount = Math.floor(paymentDetails.amount / 100);
+    const totalAmount = Math.floor(parseFloat(paymentDetails.amount) / 100);
     const commissionToAdmin = Math.floor(
       (totalAmount / 100) * ADMIN_COMMISSION,
     );
