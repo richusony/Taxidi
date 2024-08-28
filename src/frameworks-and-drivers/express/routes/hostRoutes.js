@@ -141,6 +141,13 @@ router.patch("/unlist/:vehicleId", hostProtectedRoute, verifyRole("host"), (req,
   hostController.unListVehicle(req, res);
 });
 
+router.get("/counts", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const useCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(useCase);
+
+  hostController.getCounts(req, res);
+});
+
 router.post("/refresh-token", (req, res) => {
   const hostUseCase = new HostLogin(hostRepository);
   const hostController = new HostController(hostUseCase);

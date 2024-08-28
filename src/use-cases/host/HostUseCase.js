@@ -69,4 +69,8 @@ export class HostUseCase {
     async unListVehicle(vehicleId) {
         return await this.hostRepository.unListVehicle(vehicleId);
     }
+
+    async getCounts(hostId) {
+        return await this.hostRepository.getCounts(hostId);
+    }
 }

@@ -522,4 +522,16 @@ export default class HostController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  async getCounts(req, res) {
+    const hostId = req.hostDetails._id;
+    try {
+      const counts = await this.hostUseCase.getCounts(hostId);
+      console.log("fetched host dashboard counts");
+      res.status(200).json(counts);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
 }

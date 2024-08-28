@@ -63,4 +63,15 @@ export class AdminController {
             res.status(400).json({ error: error.message });
         }
     }
+
+    async getCounts(req, res) {
+        try {
+            const counts = await this.adminUseCase.getCounts();
+            console.log("fetched dashboard counts");
+            res.status(200).json(counts);
+        } catch (error) {
+            console.log(error.message);
+            res.status(400).json({ error: error.message });
+        }
+    }
 }

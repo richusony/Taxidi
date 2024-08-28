@@ -26,6 +26,7 @@ import { VehicleController } from "../../../interface-adaptors/controllers/Vehic
 import { VehicleRepository } from "../../../interface-adaptors/repositories/VehicleRepository.js";
 import AdminLoginController from "../../../interface-adaptors/controllers/AdminLoginController.js";
 import { AdminWalletUseCase } from "../../../use-cases/AdminWalletUseCase.js";
+import { AdminUseCase } from "../../../use-cases/AdminUseCase.js";
 
 const router = express.Router();
 
@@ -254,6 +255,13 @@ router.get("/wallet-history", adminProtectRoute, verifyRole("admin"), (req, res)
   const adminController = new AdminController(useCase);
 
   adminController.getWalletHistory(req, res);
+});
+
+router.get("/counts", adminProtectRoute, verifyRole("admin"), (req, res) => {
+  const useCase = new AdminUseCase(adminRepository);
+  const adminController = new AdminController(useCase);
+
+  adminController.getCounts(req, res);
 });
 
 router.post("/refresh-token", (req, res) =>

@@ -120,7 +120,7 @@ export class HostRepository {
       const addToWallet = await HostWalletModel.findOneAndUpdate({ hostId }, {
         $inc: { balance: balanceAfterCommission }
       });
-      
+
       const addToTransactions = await HostTransactionModel.create({
         balanceAfterCommission: balanceAfterCommission,
         commissionToAdmin: commissionToAdmin,
@@ -363,6 +363,31 @@ export class HostRepository {
       await findVehicle.save();
 
       return findVehicle;
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
+
+  async getCounts(hostId) {
+    const date = new Date();
+    try {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0); // Set time to the start of the day
+
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999); // Set time to the end of the day
+
+      const vehicleCount = await VehicleModel.countDocuments({ host: hostId });
+      const todayBookingsCount = await VehicleBookingModel.countDocuments({
+        hostId,
+        createdAt: {
+          $gte: startOfDay,
+          $lt: endOfDay,
+        },
+      });
+
+      return { vehicleCount, todayBookingsCount };
     } catch (error) {
       console.log(error.message);
       throw error;
