@@ -29,6 +29,10 @@ export class HostUseCase {
         return await this.hostRepository.getWalletInfo(hostId);
     }
 
+    async getWalletHistory(hostId, limit, skip) {
+        return await this.hostRepository.getWalletHistory(hostId, limit, skip)
+    }
+
     async updateVehicle(
         vehicleId,
         mileage,

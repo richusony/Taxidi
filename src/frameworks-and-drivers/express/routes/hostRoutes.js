@@ -99,6 +99,13 @@ router.get("/wallet", hostProtectedRoute, verifyRole("host"), (req, res) => {
   hostController.getWalletInfo(req, res);
 });
 
+router.get("/wallet-history", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const hostUseCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(hostUseCase);
+
+  hostController.getWalletHistory(req, res);
+});
+
 router.post("/send-message", hostProtectedRoute, verifyRole("host"), (req, res) => {
   const hostUseCase = new Messages(hostRepository);
   const hostController = new HostController(hostUseCase);

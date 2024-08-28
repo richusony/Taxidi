@@ -177,7 +177,7 @@ export class UserRepository {
     try {
       const limitItems = parseInt(limit);
       const skipItems = parseInt(skip);
-      return await UserTransactionModel.find({ userId, paymentMethod: "wallet" }).skip(skipItems).limit(limitItems);
+      return await UserTransactionModel.find({ userId, paymentMethod: "wallet" }).skip(skipItems).limit(limitItems).sort({ createdAt: -1 });
     } catch (error) {
       console.log(error.message);
       throw error;
@@ -225,10 +225,10 @@ export class UserRepository {
       });
 
       await UserNotificationModel.create({
-        context:`Booking has been cancelled. ${totalAmount} credited to your wallet`,
+        context: `Booking has been cancelled. ${totalAmount} credited to your wallet`,
         userId: cancellBooking.paidBy
       });
-      
+
       return cancellBooking;
     } catch (error) {
       console.log(error.message);

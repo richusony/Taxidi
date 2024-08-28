@@ -414,6 +414,20 @@ export default class HostController {
     }
   }
 
+  async getWalletHistory(req, res) {
+    const hostId = req.hostDetails._id;
+    const { limit, skip } = req.query;
+
+    try {
+      const history = await this.hostUseCase.getWalletHistory(hostId, limit, skip);
+      console.log("fetched host wallet history by", hostId);
+      res.status(200).json(history);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
   async sendMessageToAdmin(req, res) {
     const admin = "admin@gmail.com";
     const hostEmail = req.hostDetails.email;

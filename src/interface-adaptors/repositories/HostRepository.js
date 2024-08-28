@@ -147,6 +147,7 @@ export class HostRepository {
       return addToWallet;
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -155,6 +156,7 @@ export class HostRepository {
       return await VehicleBookingModel.find({ paidBy: userId }).sort({ createdAt: -1 }).populate(["hostId", "vehicleId"]);
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -193,6 +195,7 @@ export class HostRepository {
       ]);
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -220,6 +223,7 @@ export class HostRepository {
       ]);
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -251,6 +255,22 @@ export class HostRepository {
       return await HostWalletModel.findOne({ hostId });
     } catch (error) {
       console.log(error.message);
+      throw error;
+    }
+  }
+
+  async getWalletHistory(hostId, limit, skip) {
+    const limitItems = parseInt(limit);
+    const skipItems = parseInt(skip);
+    try {
+      return await HostTransactionModel
+        .find({ hostId })
+        .skip(skipItems)
+        .limit(limitItems)
+        .sort({ createdAt: -1 });
+    } catch (error) {
+      console.log(error.message);
+      throw error;
     }
   }
 
@@ -263,6 +283,7 @@ export class HostRepository {
       });
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -280,6 +301,7 @@ export class HostRepository {
       ])
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -312,6 +334,7 @@ export class HostRepository {
       });
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 }
