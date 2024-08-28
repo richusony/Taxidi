@@ -61,26 +61,35 @@ const vehicleSchema = new mongoose.Schema(
       type: String,
     },
     rent: {
-      type: Number
+      type: Number,
     },
-    longitude: {
-      type: Number
-    },
-    latitude: {
-      type: Number
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"], // 'location.type' must be 'Point'
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+        // [longitude, latitude]
+      },
     },
     locationText: {
-      type: String
+      type: String,
     },
     lastServiceDate: {
-      type: String
+      type: String,
     },
     availabilityStatus: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   { timestamps: true }
 );
+
+// Create a geospatial index on the location field
+vehicleSchema.index({ location: "2dsphere" });
 
 export const VehicleModel = mongoose.model("vehicles", vehicleSchema);
