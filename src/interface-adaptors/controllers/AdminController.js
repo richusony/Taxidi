@@ -37,4 +37,30 @@ export class AdminController {
             res.status(400).json({ error: error.message });
         }
     }
+
+    async getWallet(req, res) {
+        const adminId = req.admin._id;
+        try {
+            const wallet = await this.adminUseCase.getWalletInfo(adminId);
+            console.log("fetched admin wallet", adminId);
+            res.status(200).json(wallet);
+        } catch (error) {
+            console.log(error.message);
+            res.status(400).json({ error: error.message });
+        }
+    }
+
+    async getWalletHistory(req, res) {
+        const adminId = req.admin._id;
+        const { limit, skip } = req.query;
+
+        try {
+            const walletHistory = await this.adminUseCase.getWalletHistory(adminId, limit, skip);
+            console.log("fetched admin wallet history", adminId);
+            res.status(200).json(walletHistory);
+        } catch (error) {
+            console.log(error.message);
+            res.status(400).json({ error: error.message });
+        }
+    }
 }

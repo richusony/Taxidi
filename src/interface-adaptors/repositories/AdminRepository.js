@@ -19,6 +19,7 @@ export class AdminRepository {
       return AdminModel.findById(adminId);
     } catch (error) {
       console.log("admin repo", error.message);
+      throw error;
     }
   }
 
@@ -52,11 +53,13 @@ export class AdminRepository {
         paymentId: paymentId,
         vehicleId: vehicleId,
         paymentMethod: paymentMethod,
+        credited: true
       });
 
       return addToWallet;
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -69,6 +72,7 @@ export class AdminRepository {
       });
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -86,6 +90,32 @@ export class AdminRepository {
       ])
     } catch (error) {
       console.log(error);
+      throw error;
+    }
+  }
+
+  async getWalletInfo(adminId) {
+    try {
+      return await AdminWalletModel.findOne({ adminId });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async getWalletHistory(adminId, limit, skip) {
+    const limitItems = parseInt(limit);
+    const skipItems = parseInt(skip);
+
+    try {
+      return await AdminTransactionModel
+        .find({ adminId })
+        .skip(skipItems)
+        .limit(limitItems)
+        .sort({ createdAt: -1 });
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
   }
 }

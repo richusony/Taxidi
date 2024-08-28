@@ -34,6 +34,10 @@ const hostTransactions = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    credited: {
+      type: Boolean,
+      default: true
+    }
   },
   { timestamps: true },
 );

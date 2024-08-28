@@ -25,6 +25,7 @@ import { BrandRepository } from "../../../interface-adaptors/repositories/BrandR
 import { VehicleController } from "../../../interface-adaptors/controllers/VehicleController.js";
 import { VehicleRepository } from "../../../interface-adaptors/repositories/VehicleRepository.js";
 import AdminLoginController from "../../../interface-adaptors/controllers/AdminLoginController.js";
+import { AdminWalletUseCase } from "../../../use-cases/AdminWalletUseCase.js";
 
 const router = express.Router();
 
@@ -239,6 +240,20 @@ router.get("/get-messages/:email", adminProtectRoute, verifyRole("admin"), (req,
   const adminController = new AdminController(adminUseCase);
 
   adminController.getHostMessages(req, res);
+});
+
+router.get("/wallet", adminProtectRoute, verifyRole("admin"), (req, res) => {
+  const useCase = new AdminWalletUseCase(adminRepository);
+  const adminController = new AdminController(useCase);
+
+  adminController.getWallet(req, res);
+});
+
+router.get("/wallet-history", adminProtectRoute, verifyRole("admin"), (req, res) => {
+  const useCase = new AdminWalletUseCase(adminRepository);
+  const adminController = new AdminController(useCase);
+
+  adminController.getWalletHistory(req, res);
 });
 
 router.post("/refresh-token", (req, res) =>

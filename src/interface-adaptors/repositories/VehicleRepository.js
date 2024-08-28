@@ -154,20 +154,38 @@ export class VehicleRepository {
     return await VehicleModel.deleteOne({ vehicleRegistrationNumber });
   }
 
-  async bookVehicle(vehicleId, startDate, endDate) {
+  async bookVehicle(
+    paymentId,
+    hostId,
+    totalAmount,
+    paymentMethod,
+    userId,
+    vehicleId,
+    commissionToAdmin,
+    balanceAfterCommission,
+    queryStartDate,
+    queryEndDate
+  ) {
     try {
-      const updateVehilce = await VehicleModel.findByIdAndUpdate(
-        { _id: vehicleId },
+      const bookVehicle = await VehicleBookingModel.create(
         {
-          booked: true,
-          bookingStarts: startDate,
-          bookingEnds: endDate,
+          paymentId,
+          hostId,
+          totalAmount,
+          paymentMethod,
+          paidBy: userId,
+          vehicleId,
+          commissionToAdmin,
+          balanceAfterCommission,
+          bookingStarts: queryStartDate,
+          bookingEnds: queryEndDate
         },
       );
 
-      return updateVehilce;
+      return bookVehicle;
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -186,8 +204,10 @@ export class VehicleRepository {
         convenience: Number(rating.convenience),
         timing: Number(rating.timing)
       });
+      
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 
@@ -232,6 +252,7 @@ export class VehicleRepository {
       return { reviews, rating };
     } catch (error) {
       console.log(error.message);
+      throw error;
     }
   }
 }

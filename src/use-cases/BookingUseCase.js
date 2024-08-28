@@ -68,7 +68,18 @@ export class BookingUseCase {
         paymentMethod,
       );
 
-      await this.vehicleRepository.bookVehicle(vehicle._id, queryStartDate, queryEndDate);
+      // await this.vehicleRepository.bookVehicle(
+      //   paymentId,
+      //   host._id,
+      //   totalAmount,
+      //   paymentMethod,
+      //   user._id,
+      //   vehicle._id,
+      //   commissionToAdmin,
+      //   balanceAfterCommission,
+      //   queryStartDate,
+      //   queryEndDate
+      // );
 
       return true;
     } catch (error) {

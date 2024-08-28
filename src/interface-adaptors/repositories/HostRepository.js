@@ -130,6 +130,7 @@ export class HostRepository {
         paymentId: paymentId,
         vehicleId: vehicleId,
         paymentMethod: paymentMethod,
+        credited: true
       });
       const addToBookings = await VehicleBookingModel.create({
         balanceAfterCommission: balanceAfterCommission,
