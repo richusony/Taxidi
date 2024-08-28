@@ -157,7 +157,7 @@ export class UserController {
   }
 
   async getAllAvailableCars(req, res) {
-    const { brand, bodyType, fuel, priceRange, bookingStarts, bookingEnds, latitude, longitude } = req.query;
+    const { brand, bodyType, fuel, price, bookingStarts, bookingEnds, latitude, longitude, limit, skip } = req.query;
     console.log("query::", req.query)
     if (!bookingStarts || !bookingEnds) {
       return res
@@ -170,11 +170,13 @@ export class UserController {
         brand,
         bodyType,
         fuel,
-        priceRange,
+        price,
         bookingStarts,
         bookingEnds,
         latitude,
-        longitude
+        longitude,
+        limit,
+        skip
       );
       // console.log(availableCars);
       console.log("fetched all available vechiles in", bookingStarts, "-", bookingEnds);

@@ -60,10 +60,10 @@ export class VehicleRepository {
     return await VehicleModel.find({}).populate(["host", "brand", "bodyType"]);
   }
 
-  async getAllAvailableCars(brand, bodyType, fuel, priceRange, bookingStartsString, bookingEndsString, latitude, longitude) {
+  async getAllAvailableCars(brand, bodyType, fuel, priceRange, bookingStartsString, bookingEndsString, latitude, longitude, limit, skip) {
     const bookingStarts = new Date(`${bookingStartsString}:00Z`); // Appending seconds and time zone
     const bookingEnds = new Date(`${bookingEndsString}:00Z`);
-  
+
     try {
       // Step 1: Aggregate overlapping bookings to get booked vehicle IDs
       const bookedVehicleIds = await VehicleBookingModel.aggregate([
@@ -86,28 +86,39 @@ export class VehicleRepository {
           }
         }
       ]);
-      console.log("bookedVehicless ",bookedVehicleIds)
+      // console.log("bookedVehicless ", bookedVehicleIds)
       // Extract vehicle IDs from the aggregation result
       const vehicleIds = bookedVehicleIds.length > 0 ? bookedVehicleIds[0].vehicleIds : [];
-  
+
       // Step 2: Create filter object based on provided parameters
       const filter = {
         _id: { $nin: vehicleIds },
         availabilityStatus: true, // Assuming this field indicates availability
       };
-      console.log("filter",filter)
+      // console.log("filter", filter)
       if (brand && brand !== "None") filter.brand = new mongoose.Types.ObjectId(brand);
       if (bodyType && bodyType !== "None") filter.bodyType = new mongoose.Types.ObjectId(bodyType);
       if (fuel && fuel !== "None") filter.fuel = fuel;
-      if (priceRange && priceRange !== "None") filter.rent = { $lte: parseFloat(priceRange) };
-  
+
+      // Handle price range
+      if (priceRange && priceRange !== "None") {
+        // Convert priceRange string to array
+        const [minPrice, maxPrice] = JSON.parse(priceRange);
+
+        // Filter by price range
+        filter.rent = {
+          $gte: minPrice,
+          $lte: maxPrice
+        };
+      }
+
       // Ensure latitude and longitude are numbers
       const parsedLatitude = parseFloat(latitude);
       const parsedLongitude = parseFloat(longitude);
       if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
         throw new Error('Invalid latitude or longitude');
       }
-  
+
       // Step 3: Apply geospatial query and filters
       const availableCars = await VehicleModel.find(filter)
         .where("location")
@@ -120,15 +131,16 @@ export class VehicleRepository {
           spherical: true
         })
         .populate(["brand", "bodyType"]) // Populate fields as needed
+        .limit(parseInt(limit))
+        .skip(parseInt(skip))
         .exec();
-  
+      console.log("response :", availableCars);
       return availableCars;
     } catch (error) {
       console.error('Error fetching available cars:', error);
       throw error;
     }
   }
-  
 
   async getCarDetails(vehicleRegistrationNumber) {
     return await VehicleModel.findOne({ vehicleRegistrationNumber }).populate([

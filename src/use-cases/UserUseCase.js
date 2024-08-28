@@ -11,7 +11,9 @@ export class UserUseCase {
         bookingStarts,
         bookingEnds,
         latitude,
-        longitude
+        longitude,
+        limit,
+        skip
     ) {
         return await this.repository.getAllAvailableCars(
             brand,
@@ -21,7 +23,9 @@ export class UserUseCase {
             bookingStarts,
             bookingEnds,
             latitude,
-            longitude
+            longitude,
+            limit,
+            skip
         );
     }
 
