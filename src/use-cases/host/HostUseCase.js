@@ -61,4 +61,12 @@ export class HostUseCase {
             lastServiceDate,
             locationText);
     }
+
+    async listVehicle(vehicleId) {
+        return await this.hostRepository.listVehicle(vehicleId);
+    }
+
+    async unListVehicle(vehicleId) {
+        return await this.hostRepository.unListVehicle(vehicleId);
+    }
 }

@@ -337,4 +337,34 @@ export class HostRepository {
       throw error;
     }
   }
+
+  async listVehicle(vehicleId) {
+    try {
+      const findVehicle = await VehicleModel.findById(vehicleId);
+      if(!findVehicle) throw new Error("vehicle not found");
+
+      findVehicle.availabilityStatus = true;
+      await findVehicle.save();
+
+      return findVehicle;
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
+
+  async unListVehicle(vehicleId) {
+    try {
+      const findVehicle = await VehicleModel.findById(vehicleId);
+      if(!findVehicle) throw new Error("vehicle not found");
+
+      findVehicle.availabilityStatus = false;
+      await findVehicle.save();
+      
+      return findVehicle;
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
 }

@@ -127,6 +127,20 @@ router.patch("/update-vehicle", hostProtectedRoute, verifyRole("host"), (req, re
   hostController.updateVehilce(req, res);
 });
 
+router.patch("/list/:vehicleId", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const useCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(useCase);
+
+  hostController.listVehicle(req, res);
+});
+
+router.patch("/unlist/:vehicleId", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const useCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(useCase);
+
+  hostController.unListVehicle(req, res);
+});
+
 router.post("/refresh-token", (req, res) => {
   const hostUseCase = new HostLogin(hostRepository);
   const hostController = new HostController(hostUseCase);

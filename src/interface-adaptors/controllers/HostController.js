@@ -498,4 +498,28 @@ export default class HostController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  async listVehicle(req, res) {
+    const { vehicleId } = req.params;
+    try {
+      const list = await this.hostUseCase.listVehicle(vehicleId);
+      console.log("vehicle listed", vehicleId);
+      res.status(200).json(list);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async unListVehicle(req, res) {
+    const { vehicleId } = req.params;
+    try {
+      const list = await this.hostUseCase.unListVehicle(vehicleId);
+      console.log("vehicle unlisted", vehicleId);
+      res.status(200).json(list);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
