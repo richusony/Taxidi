@@ -264,6 +264,13 @@ router.get("/counts", adminProtectRoute, verifyRole("admin"), (req, res) => {
   adminController.getCounts(req, res);
 });
 
+router.get("/chart-data/:filter", adminProtectRoute, verifyRole("admin"), (req, res) => {
+  const useCase = new AdminUseCase(adminRepository);
+  const adminController = new AdminController(useCase);
+
+  adminController.getChartData(req, res);
+});
+
 router.post("/refresh-token", (req, res) =>
   adminController.adminRefreshToken(req, res)
 );

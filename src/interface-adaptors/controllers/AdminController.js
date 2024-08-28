@@ -74,4 +74,16 @@ export class AdminController {
             res.status(400).json({ error: error.message });
         }
     }
+
+    async getChartData(req, res) {
+        const { filter } = req.params;
+        try {
+            const data = await this.adminUseCase.getChartData(filter);
+            // console.log("host chart data");
+            res.status(200).json(data);
+        } catch (error) {
+            console.log(error.message);
+            res.status(400).json({ error: error.message });
+        }
+    }
 }

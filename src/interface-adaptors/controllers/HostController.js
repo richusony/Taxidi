@@ -534,4 +534,17 @@ export default class HostController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  async getChartData(req, res) {
+    const hostId = req.hostDetails._id;
+    const { filter } = req.params;
+    try {
+      const data = await this.hostUseCase.getChartData(filter, hostId);
+      // console.log("host chart data");
+      res.status(200).json(data);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
 }

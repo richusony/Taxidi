@@ -1,3 +1,4 @@
+import moment from "moment";
 import { AdminModel } from "../../frameworks-and-drivers/database/mongoose/models/AdminModel.js";
 import AdminTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/AdminPaymentHistory.js";
 import AdminWalletModel from "../../frameworks-and-drivers/database/mongoose/models/AdminWallet.js";
@@ -147,5 +148,57 @@ export class AdminRepository {
       console.log(error);
       throw error;
     }
+  }
+
+  // Function to get sales data based on the filter (implement as needed)
+  async getChartData(filter) {
+    let aggregationPipeline = [];
+
+    if (filter === 'monthly') {
+      // Aggregate monthly sales
+      aggregationPipeline = [
+        {
+          $match: { bookingStatus: true }, // Add a match stage to filter by orderStatus
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" },
+            },
+            totalSales: { $sum: 1 },
+          },
+        },
+      ];
+    } else if (filter === 'yearly') {
+      // Aggregate yearly sales
+      aggregationPipeline = [
+        {
+          $match: { bookingStatus: true }, // Add a match stage to filter by orderStatus
+        },
+        {
+          $group: {
+            _id: { $year: "$createdAt" },
+            totalSales: { $sum: 1 },
+          },
+        },
+      ];
+    } else {
+      // Handle other filters if needed
+    }
+
+    const salesData = await VehicleBookingModel.aggregate(aggregationPipeline);
+
+    // Format data for the chart
+    const formattedData = {
+      labels: salesData.map(entry =>
+        filter === "monthly"
+          ? moment(`${entry._id.year}-${entry._id.month}`, "YYYY-MM").format("MMMM YYYY")
+          : entry._id.toString()
+      ),
+      data: salesData.map(entry => entry.totalSales),
+    };
+
+    return formattedData;
   }
 }

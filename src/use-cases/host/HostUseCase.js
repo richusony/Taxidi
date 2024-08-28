@@ -73,4 +73,8 @@ export class HostUseCase {
     async getCounts(hostId) {
         return await this.hostRepository.getCounts(hostId);
     }
+
+    async getChartData(filter, hostId) {
+        return await this.hostRepository.getChartData(filter, hostId)
+    }
 }
