@@ -27,7 +27,7 @@ export class UserWalletUseCase {
     }
   }
 
-  async getWalletHistory(userId) {
-    return await this.userRepository.getWalletHistory(userId);
+  async getWalletHistory(userId, limit, skip) {
+    return await this.userRepository.getWalletHistory(userId, limit, skip);
   }
 }

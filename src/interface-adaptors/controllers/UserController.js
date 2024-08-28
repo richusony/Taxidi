@@ -158,7 +158,7 @@ export class UserController {
 
   async getAllAvailableCars(req, res) {
     const { brand, bodyType, fuel, price, bookingStarts, bookingEnds, latitude, longitude, limit, skip } = req.query;
-    console.log("query::", req.query)
+    // console.log("query::", req.query)
     if (!bookingStarts || !bookingEnds) {
       return res
         .status(400)
@@ -389,9 +389,11 @@ export class UserController {
 
   async getWalletHistory(req, res) {
     const userId = req.user._id;
+    const { limit, skip } = req.query;
+    // console.log(req.query);
     try {
-      const walletHistory = await this.userUseCase.getWalletHistory(userId);
-      console.log("fetched user wallet History", walletHistory);
+      const walletHistory = await this.userUseCase.getWalletHistory(userId, limit, skip);
+      console.log("fetched user wallet History of", userId);
       res.status(200).json(walletHistory);
     } catch (error) {
       console.log(error.message);
