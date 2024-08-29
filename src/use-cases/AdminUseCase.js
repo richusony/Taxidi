@@ -30,4 +30,40 @@ export class AdminUseCase {
       adminId,
     );
   }
+
+  async updateVehicle(
+    vehicleId,
+    color,
+    mileage,
+    rent,
+    city,
+    pincode,
+    pickUpLocation,
+    latitude,
+    longitude,
+    lastServiceDate,
+    locationText,
+  ) {
+    return await this.repository.updateVehicle(
+      vehicleId,
+      color,
+      mileage,
+      rent,
+      city,
+      pincode,
+      pickUpLocation,
+      latitude,
+      longitude,
+      lastServiceDate,
+      locationText,
+    );
+  }
+
+   async listVehicle(vehicleId) {
+    return await this.repository.listVehicle(vehicleId);
+  }
+
+  async unListVehicle(vehicleId) {
+    return await this.repository.unListVehicle(vehicleId);
+  }
 }

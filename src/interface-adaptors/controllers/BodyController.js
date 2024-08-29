@@ -6,7 +6,7 @@ export class BodyController {
   async createBody(req, res) {
     const { bodyType } = req.body;
     // res.send("working")
-    console.log(req.body);
+    // console.log(req.body);
 
     try {
       const body = await this.bodyUseCase.execute(bodyType);

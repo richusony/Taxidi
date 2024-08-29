@@ -388,4 +388,71 @@ export class AdminRepository {
       throw error;
     }
   }
+
+  async updateVehicle(
+    vehicleId,
+    color,
+    mileage,
+    rent,
+    city,
+    pincode,
+    pickUpLocation,
+    latitude,
+    longitude,
+    lastServiceDate,
+    locationText,
+  ) {
+    try {
+      return await VehicleModel.findByIdAndUpdate(
+        { _id: vehicleId },
+        {
+          color,
+          mileage,
+          rent,
+          city,
+          pincode,
+          pickUpLocation,
+          lastServiceDate,
+          locationText,
+          location: {
+            type: "Point",
+            coordinates: [longitude, latitude]
+          }
+        },
+      );
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
+
+  async listVehicle(vehicleId) {
+    try {
+      const findVehicle = await VehicleModel.findById(vehicleId).populate("host");
+      if (!findVehicle) throw new Error("vehicle not found");
+
+      findVehicle.availabilityStatus = true;
+      await findVehicle.save();
+
+      return findVehicle;
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
+
+  async unListVehicle(vehicleId) {
+    try {
+      const findVehicle = await VehicleModel.findById(vehicleId).populate("host");
+      if (!findVehicle) throw new Error("vehicle not found");
+
+      findVehicle.availabilityStatus = false;
+      await findVehicle.save();
+
+      return findVehicle;
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
 }

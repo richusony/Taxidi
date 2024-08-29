@@ -2,12 +2,23 @@ import { BodyModel } from "../../frameworks-and-drivers/database/mongoose/models
 
 export class BodyRepository {
   async save(body) {
-    const bodyModel = new BodyModel({
-      bodyType: body.bodyType.trim().toUpperCase()
-    });
+    try {
+      const findBody = await BodyModel.findOne({
+        bodyType: body.bodyType.trim().toUpperCase(),
+      });
 
-    await bodyModel.save();
-    return bodyModel;
+      if (findBody) throw new Error("Body Type already added");
+
+      const bodyModel = new BodyModel({
+        bodyType: body.bodyType.trim().toUpperCase(),
+      });
+
+      await bodyModel.save();
+      return bodyModel;
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
   }
 
   async findByBody(body) {

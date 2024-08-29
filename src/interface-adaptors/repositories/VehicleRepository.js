@@ -6,34 +6,52 @@ import VehicleReviewModel from "../../frameworks-and-drivers/database/mongoose/m
 
 export class VehicleRepository {
   async save(vehicle) {
-    // console.log("repository", vehicle);
-    const vehicleModel = new VehicleModel({
-      model: vehicle.model,
-      brand: vehicle.brand,
-      color: vehicle.color,
-      bodyType: vehicle.bodyType,
-      fuel: vehicle.fuel,
-      transmission: vehicle.transmission,
-      seats: vehicle.seats,
-      rent: vehicle.rent,
-      vehicleRegistrationNumber: vehicle.vehicleRegistrationNumber,
-      registrationCertificateFrontImage:
-        vehicle.registrationCertificateFrontImage,
-      registrationCertificateBackImage:
-        vehicle.registrationCertificateBackImage,
-      mileage: vehicle.mileage,
-      pickUpLocation: vehicle.pickUpLocation,
-      host: vehicle.host,
-      vehicleImages: vehicle.vehicleImages,
-      insuranceCertificateImage: vehicle.insuranceCertificateImage,
-      pollutionCertificateImage: vehicle.pollutionCertificateImage,
-      bookingStarts: null,
-      bookingEnds: null,
-    });
-    console.log(vehicle);
-    await vehicleModel.save();
-    console.log("vehicle added to database");
-    return vehicleModel;
+    try {
+      const findVehicle = await VehicleModel.findOne({
+        vehicleRegistrationNumber: vehicle.vehicleRegistrationNumber,
+      });
+
+      if (findVehicle)
+        throw new Error(
+          "Vehicle already existed with number:",
+          findVehicle.vehicleRegistrationNumber,
+        );
+
+      const vehicleModel = new VehicleModel({
+        model: vehicle.model,
+        brand: vehicle.brand,
+        color: vehicle.color,
+        bodyType: vehicle.bodyType,
+        fuel: vehicle.fuel,
+        transmission: vehicle.transmission,
+        seats: vehicle.seats,
+        rent: vehicle.rent,
+        vehicleRegistrationNumber: vehicle.vehicleRegistrationNumber,
+        registrationCertificateFrontImage:
+          vehicle.registrationCertificateFrontImage,
+        registrationCertificateBackImage:
+          vehicle.registrationCertificateBackImage,
+        mileage: vehicle.mileage,
+        pickUpLocation: vehicle.pickUpLocation,
+        host: vehicle.host,
+        vehicleImages: vehicle.vehicleImages,
+        insuranceCertificateImage: vehicle.insuranceCertificateImage,
+        pollutionCertificateImage: vehicle.pollutionCertificateImage,
+        location: {
+          type: "Point",
+          coordinates: [vehicle.longitude, vehicle.latitude], // Add coordinates from the vehicle object
+        },
+        city: vehicle.city,
+        pincode: vehicle.pincode,
+      });
+      // console.log(vehicle);
+      await vehicleModel.save();
+
+      return vehicleModel;
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
   }
 
   async findByModel(model) {
@@ -206,18 +224,21 @@ export class VehicleRepository {
 
   async postReviewAndRating(userId, vehicleId, reviewMsg, rating) {
     try {
+      const alreadyRated = await VehicleRatingModel.findOne({ userId });
+      if (!alreadyRated) {
+        await VehicleRatingModel.create({
+          vehicleId,
+          cleanliness: Number(rating.cleanliness),
+          maintenance: Number(rating.maintenance),
+          convenience: Number(rating.convenience),
+          timing: Number(rating.timing),
+        });
+      }
+
       await VehicleReviewModel.create({
         reviewMessage: reviewMsg,
         userId,
         vehicleId,
-      });
-
-      return await VehicleRatingModel.create({
-        vehicleId,
-        cleanliness: Number(rating.cleanliness),
-        maintenance: Number(rating.maintenance),
-        convenience: Number(rating.convenience),
-        timing: Number(rating.timing),
       });
     } catch (error) {
       console.log(error.message);

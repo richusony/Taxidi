@@ -1,24 +1,32 @@
 import mongoose from "mongoose";
 
-const ratingSchema = new mongoose.Schema({
+const ratingSchema = new mongoose.Schema(
+  {
     vehicleId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "vehicles",
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "vehicles",
+      required: true,
     },
     cleanliness: {
-        type: Number
+      type: Number,
     },
     maintenance: {
-        type: Number
+      type: Number,
     },
     convenience: {
-        type: Number
+      type: Number,
     },
     timing: {
-        type: Number
-    }
-}, { timestamps: true });
+      type: Number,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
+    },
+  },
+  { timestamps: true },
+);
 
 const VehicleRatingModel = mongoose.model("vehicle_rating", ratingSchema);
 

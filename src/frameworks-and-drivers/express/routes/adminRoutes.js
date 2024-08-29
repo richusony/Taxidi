@@ -229,19 +229,29 @@ router.get("/hosts", adminProtectRoute, verifyRole("admin"), (req, res) => {
   hostController.getAllHosts(req, res);
 });
 
-router.post("/send-message", adminProtectRoute, verifyRole("admin"), (req, res) => {
-  const adminUseCase = new AdminMessages(adminRepository);
-  const adminController = new AdminController(adminUseCase);
+router.post(
+  "/send-message",
+  adminProtectRoute,
+  verifyRole("admin"),
+  (req, res) => {
+    const adminUseCase = new AdminMessages(adminRepository);
+    const adminController = new AdminController(adminUseCase);
 
-  adminController.sendMessageToHost(req, res);
-});
+    adminController.sendMessageToHost(req, res);
+  },
+);
 
-router.get("/get-messages/:email", adminProtectRoute, verifyRole("admin"), (req, res) => {
-  const adminUseCase = new AdminMessages(adminRepository);
-  const adminController = new AdminController(adminUseCase);
+router.get(
+  "/get-messages/:email",
+  adminProtectRoute,
+  verifyRole("admin"),
+  (req, res) => {
+    const adminUseCase = new AdminMessages(adminRepository);
+    const adminController = new AdminController(adminUseCase);
 
-  adminController.getHostMessages(req, res);
-});
+    adminController.getHostMessages(req, res);
+  },
+);
 
 router.get("/wallet", adminProtectRoute, verifyRole("admin"), (req, res) => {
   const useCase = new AdminWalletUseCase(adminRepository);
@@ -250,12 +260,17 @@ router.get("/wallet", adminProtectRoute, verifyRole("admin"), (req, res) => {
   adminController.getWallet(req, res);
 });
 
-router.get("/wallet-history", adminProtectRoute, verifyRole("admin"), (req, res) => {
-  const useCase = new AdminWalletUseCase(adminRepository);
-  const adminController = new AdminController(useCase);
+router.get(
+  "/wallet-history",
+  adminProtectRoute,
+  verifyRole("admin"),
+  (req, res) => {
+    const useCase = new AdminWalletUseCase(adminRepository);
+    const adminController = new AdminController(useCase);
 
-  adminController.getWalletHistory(req, res);
-});
+    adminController.getWalletHistory(req, res);
+  },
+);
 
 router.get("/counts", adminProtectRoute, verifyRole("admin"), (req, res) => {
   const useCase = new AdminUseCase(adminRepository);
@@ -264,12 +279,17 @@ router.get("/counts", adminProtectRoute, verifyRole("admin"), (req, res) => {
   adminController.getCounts(req, res);
 });
 
-router.get("/chart-data/:filter", adminProtectRoute, verifyRole("admin"), (req, res) => {
-  const useCase = new AdminUseCase(adminRepository);
-  const adminController = new AdminController(useCase);
+router.get(
+  "/chart-data/:filter",
+  adminProtectRoute,
+  verifyRole("admin"),
+  (req, res) => {
+    const useCase = new AdminUseCase(adminRepository);
+    const adminController = new AdminController(useCase);
 
-  adminController.getChartData(req, res);
-});
+    adminController.getChartData(req, res);
+  },
+);
 
 router.get("/bookings", adminProtectRoute, verifyRole("admin"), (req, res) => {
   const useCase = new AdminUseCase(adminRepository);
@@ -278,29 +298,78 @@ router.get("/bookings", adminProtectRoute, verifyRole("admin"), (req, res) => {
   adminController.getBookings(req, res);
 });
 
-router.get("/booking-details/:paymentId", adminProtectRoute, verifyRole("admin"), (req, res) => {
-  const useCase = new AdminUseCase(adminRepository);
-  const adminController = new AdminController(useCase);
+router.get(
+  "/booking-details/:paymentId",
+  adminProtectRoute,
+  verifyRole("admin"),
+  (req, res) => {
+    const useCase = new AdminUseCase(adminRepository);
+    const adminController = new AdminController(useCase);
 
-  adminController.getBookingDetails(req, res);
-});
+    adminController.getBookingDetails(req, res);
+  },
+);
 
-router.get("/booking-history", adminProtectRoute, verifyRole("admin"), (req, res) => {
-  const useCase = new AdminUseCase(adminRepository);
-  const adminController = new AdminController(useCase);
+router.get(
+  "/booking-history",
+  adminProtectRoute,
+  verifyRole("admin"),
+  (req, res) => {
+    const useCase = new AdminUseCase(adminRepository);
+    const adminController = new AdminController(useCase);
 
-  adminController.getBookingHistory(req, res);
-});
+    adminController.getBookingHistory(req, res);
+  },
+);
 
-router.post("/cancel-booking", adminProtectRoute, verifyRole("admin"), (req, res) => {
-  const useCase = new AdminUseCase(adminRepository);
-  const adminController = new AdminController(useCase);
+router.post(
+  "/cancel-booking",
+  adminProtectRoute,
+  verifyRole("admin"),
+  (req, res) => {
+    const useCase = new AdminUseCase(adminRepository);
+    const adminController = new AdminController(useCase);
 
-  adminController.cancelBooking(req, res);
-});
+    adminController.cancelBooking(req, res);
+  },
+);
+
+router.patch(
+  "/update-vehicle",
+  adminProtectRoute,
+  verifyRole("admin"),
+  (req, res) => {
+    const useCase = new AdminUseCase(adminRepository);
+    const adminController = new AdminController(useCase);
+
+    adminController.updateVehicle(req, res);
+  },
+);
+router.patch(
+  "/list/:vehicleId",
+  adminProtectRoute,
+  verifyRole("admin"),
+  (req, res) => {
+    const useCase = new AdminUseCase(adminRepository);
+    const adminController = new AdminController(useCase);
+
+    adminController.listVehicle(req, res);
+  },
+);
+router.patch(
+  "/unlist/:vehicleId",
+  adminProtectRoute,
+  verifyRole("admin"),
+  (req, res) => {
+    const useCase = new AdminUseCase(adminRepository);
+    const adminController = new AdminController(useCase);
+
+    adminController.unListVehicle(req, res);
+  },
+);
 
 router.post("/refresh-token", (req, res) =>
-  adminController.adminRefreshToken(req, res)
+  adminController.adminRefreshToken(req, res),
 );
 
 router.get("/logout", adminProtectRoute, verifyRole("admin"), (req, res) =>

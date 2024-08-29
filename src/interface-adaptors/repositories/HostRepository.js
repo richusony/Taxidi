@@ -457,9 +457,8 @@ export class HostRepository {
 
   async updateVehicle(
     vehicleId,
-    mileage,
-    seats,
     color,
+    mileage,
     rent,
     city,
     pincode,
@@ -473,17 +472,18 @@ export class HostRepository {
       return await VehicleModel.findByIdAndUpdate(
         { _id: vehicleId },
         {
-          mileage,
-          seats,
           color,
+          mileage,
           rent,
           city,
           pincode,
           pickUpLocation,
-          latitude,
-          longitude,
           lastServiceDate,
           locationText,
+          location: {
+            type: "Point",
+            coordinates: [longitude, latitude]
+          }
         },
       );
     } catch (error) {
@@ -646,6 +646,24 @@ export class HostRepository {
 
       findHost.save();
       return findHost;
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
+
+  async getBrands() {
+    try {
+      return await BrandModel.find({});
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
+
+  async getBodyTypes() {
+    try {
+      return await BodyModel.find({});
     } catch (error) {
       console.log(error.message);
       throw error;

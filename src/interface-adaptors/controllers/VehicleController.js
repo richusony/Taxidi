@@ -19,8 +19,10 @@ export class VehicleController {
       pickUpLocation,
       host,
       rent,
+      latitude,
+      longitude,
     } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
 
     const registrationCertificateFrontImage =
       req.files.registrationCertificateFrontImage[0].path;
@@ -31,12 +33,12 @@ export class VehicleController {
     const pollutionCertificateImage =
       req.files.pollutionCertificateImage[0].path;
     const vehicleImages = await this.vehicleUseCase.uploadFiles(
-      req.files.vehicleImages
+      req.files.vehicleImages,
     );
 
     try {
       const vehicleExists = await this.vehicleUseCase.findByRC(
-        vehicleRegistrationNumber
+        vehicleRegistrationNumber,
       );
 
       if (vehicleExists) {
@@ -63,7 +65,9 @@ export class VehicleController {
         vehicleImages,
         insuranceCertificateImage,
         pollutionCertificateImage,
-        rent
+        rent,
+        parseFloat(latitude),
+        parseFloat(longitude),
       );
 
       res.status(201).json(vehicle);
@@ -86,9 +90,8 @@ export class VehicleController {
   async getVehicleDetails(req, res) {
     const { registrationNumber } = req.params;
     try {
-      const vehicleDetails = await this.vehicleUseCase.getVehicleDetails(
-        registrationNumber
-      );
+      const vehicleDetails =
+        await this.vehicleUseCase.getVehicleDetails(registrationNumber);
       res.status(200).json(vehicleDetails);
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -99,9 +102,10 @@ export class VehicleController {
     const { registrationNumber } = req.params;
 
     try {
-      const deleteVehicle = await this.vehicleUseCase.deleteVehicle(registrationNumber);
+      const deleteVehicle =
+        await this.vehicleUseCase.deleteVehicle(registrationNumber);
       console.log("vehicle deleted from database");
-      res.status(200).json({success: "Vehicle deleted"});
+      res.status(200).json({ success: "Vehicle deleted" });
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });

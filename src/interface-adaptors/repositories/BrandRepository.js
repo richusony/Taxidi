@@ -2,7 +2,9 @@ import { BrandModel } from "../../frameworks-and-drivers/database/mongoose/model
 
 export class BrandRepository {
   async save(brand) {
-    const alreadyExistsBrand = await BrandModel.findOne({ brandName: brand.brandName });
+    const alreadyExistsBrand = await BrandModel.findOne({
+      brandName: brand.brandName,
+    });
     if (alreadyExistsBrand) {
       throw new Error("already exists");
     }
@@ -25,27 +27,32 @@ export class BrandRepository {
   }
 
   async updateBrand(brandName, brandId, brandImage) {
-    const brandExists = await BrandModel.findById(brandId);
+    const brandExistsById = await BrandModel.findById(brandId);
+    if (!brandExistsById) throw new Error("Brand does not exist");
 
-    if (!brandExists) throw new Error("Brand does not exists");
+    const normalizedBrandName = brandName.trim().toUpperCase();
 
-    if (brandImage != null) {
-      await BrandModel.updateOne(
-        { _id: brandExists._id },
-        {
-          brandName: brandName.trim().toUpperCase(),
-          brandImage: brandImage,
-        }
-      );
-    } else {
-      await BrandModel.updateOne(
-        { _id: brandExists._id },
-        {
-          brandName: brandName.trim().toUpperCase(),
-        }
-      );
+    const brandExistsByName = await BrandModel.findOne({
+      brandName: normalizedBrandName,
+    });
+
+    if (
+      brandExistsByName &&
+      brandExistsByName._id.equals(brandExistsById._id)
+    ) {
+      console.log("brand name is equal");
+      throw new Error("Brand with this name already exists");
     }
 
-    return brandExists;
+    const updateData = { brandName: normalizedBrandName };
+    if (brandImage != null) {
+      updateData.brandImage = brandImage;
+    }
+
+    await BrandModel.updateOne({ _id: brandExistsById._id }, updateData);
+
+    // Fetch and return the updated brand
+    const updatedBrand = await BrandModel.findById(brandId);
+    return updatedBrand;
   }
 }

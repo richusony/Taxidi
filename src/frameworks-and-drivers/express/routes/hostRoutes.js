@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyRole } from "../middlewares/verifyRole.js";
-import { hostParser } from "../../external-lib/multer.js";
+import { parser, hostParser } from "../../external-lib/multer.js";
 import { hostProfileParse } from "../../external-lib/multer.js";
 import { HostLogin } from "../../../use-cases/host/HostLogin.js";
 import { HostUseCase } from "../../../use-cases/host/HostUseCase.js";
@@ -9,6 +9,9 @@ import { HostRequestUseCase } from "../../../use-cases/host/HostRequest.js";
 import HostController from "../../../interface-adaptors/controllers/HostController.js";
 import { HostRepository } from "../../../interface-adaptors/repositories/HostRepository.js";
 import { Messages } from "../../../use-cases/host/Messages.js";
+import { VehicleRepository } from "../../../interface-adaptors/repositories/VehicleRepository.js";
+import { AddVehicle } from "../../../use-cases/AddVehicle.js";
+import { VehicleController } from "../../../interface-adaptors/controllers/VehicleController.js";
 
 const router = express.Router();
 const hostRepository = new HostRepository();
@@ -242,6 +245,44 @@ router.patch(
     const hostController = new HostController(useCase);
 
     hostController.updateHostProfileImage(req, res);
+  },
+);
+
+router.get("/brands", hostProtectedRoute, verifyRole("host"), (req, res) => {
+  const useCase = new HostUseCase(hostRepository);
+  const hostController = new HostController(useCase);
+
+  hostController.getBrands(req, res);
+});
+
+router.get(
+  "/body-types",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const useCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(useCase);
+
+    hostController.getBodyTypes(req, res);
+  },
+);
+
+router.post(
+  "/add-vehicle",
+  parser.fields([
+    { name: "registrationCertificateFrontImage", maxCount: 1 },
+    { name: "registrationCertificateBackImage", maxCount: 1 },
+    { name: "insuranceCertificateImage", maxCount: 1 },
+    { name: "pollutionCertificateImage", maxCount: 1 },
+    { name: "vehicleImages", maxCount: 15 },
+  ]),
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const vehicleRepository = new VehicleRepository();
+    const creatVehicle = new AddVehicle(vehicleRepository);
+    const vehicleController = new VehicleController(creatVehicle);
+    vehicleController.addCar(req, res);
   },
 );
 

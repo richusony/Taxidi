@@ -37,7 +37,7 @@ export class BrandController {
         brandId,
         brandImage
       );
-      res.status(200);
+      res.status(200).json(updateBrand);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });

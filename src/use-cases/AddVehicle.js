@@ -25,7 +25,9 @@ export class AddVehicle {
     vehicleImages,
     insuranceCertificateImage,
     pollutionCertificateImage,
-    rent
+    rent,
+    latitude,
+    longitude,
   ) {
     const vehicle = new Vehicle(
       null,
@@ -47,9 +49,11 @@ export class AddVehicle {
       vehicleImages,
       insuranceCertificateImage,
       pollutionCertificateImage,
-      rent
+      rent,
+      latitude,
+      longitude,
     );
-
+    // console.log("vehicle:",vehicle)
     vehicle.validate();
     // console.log(vehicle);
     return this.vehicleRepository.save(vehicle);

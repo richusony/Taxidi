@@ -497,9 +497,8 @@ export default class HostController {
     try {
       const {
         vehicleId,
-        mileage,
-        seats,
         color,
+        mileage,
         rent,
         city,
         pincode,
@@ -512,9 +511,8 @@ export default class HostController {
 
       const update = await this.hostUseCase.updateVehicle(
         vehicleId,
-        mileage,
-        seats,
         color,
+        mileage,
         rent,
         city,
         pincode,
@@ -594,10 +592,15 @@ export default class HostController {
 
   async updateHost(req, res) {
     const hostId = req.hostDetails._id;
-    const {fullname, email, phone} = req.body;
+    const { fullname, email, phone } = req.body;
 
     try {
-      const data = await this.hostUseCase.updateHost(hostId, fullname.trim(), email.trim(), phone);
+      const data = await this.hostUseCase.updateHost(
+        hostId,
+        fullname.trim(),
+        email.trim(),
+        phone,
+      );
       res.status(200).json(data);
     } catch (error) {
       console.log(error.message);
@@ -609,11 +612,112 @@ export default class HostController {
     const hostId = req.hostDetails._id;
     const profileImage = req?.file?.path;
 
-    if(!profileImage) return res.status(400).json({error: "problem with getting profile Image url"});
+    if (!profileImage)
+      return res
+        .status(400)
+        .json({ error: "problem with getting profile Image url" });
 
     try {
-      const data = await this.hostUseCase.updateHostProfileImage(hostId, profileImage);
+      const data = await this.hostUseCase.updateHostProfileImage(
+        hostId,
+        profileImage,
+      );
       res.status(200).json(data);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async getBrands(req, res) {
+    try {
+      const brands = await this.hostUseCase.getBrands();
+      res.status(200).json(brands);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async getBodyTypes(req, res) {
+    try {
+      const bodyTypes = await this.hostUseCase.getBodyTypes();
+      res.status(200).json(bodyTypes);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async addVehicle(req, res) {
+    const {
+      model,
+      brand,
+      color,
+      bodyType,
+      fuel,
+      transmission,
+      seats,
+      vehicleRegistrationNumber,
+      mileage,
+      city,
+      pincode,
+      pickUpLocation,
+      host,
+      rent,
+      latitude,
+      longitude,
+    } = req.body;
+    // console.log(req.body);
+
+    const registrationCertificateFrontImage =
+      req.files.registrationCertificateFrontImage[0].path;
+    const registrationCertificateBackImage =
+      req.files.registrationCertificateBackImage[0].path;
+    const insuranceCertificateImage =
+      req.files.insuranceCertificateImage[0].path;
+    const pollutionCertificateImage =
+      req.files.pollutionCertificateImage[0].path;
+    const vehicleImages = await this.vehicleUseCase.uploadFiles(
+      req.files.vehicleImages,
+    );
+
+    try {
+      const vehicleExists = await this.vehicleUseCase.findByRC(
+        vehicleRegistrationNumber,
+      );
+
+      if (vehicleExists) {
+        res.status(400).json({ error: "Vehicle already exists" });
+        return;
+      }
+
+      const vehicle = await this.vehicleUseCase.execute(
+        model,
+        brand,
+        color,
+        bodyType,
+        fuel,
+        transmission,
+        seats,
+        vehicleRegistrationNumber,
+        registrationCertificateFrontImage,
+        registrationCertificateBackImage,
+        mileage,
+        city,
+        pincode,
+        pickUpLocation,
+        host,
+        vehicleImages,
+        insuranceCertificateImage,
+        pollutionCertificateImage,
+        rent,
+        parseFloat(latitude),
+        parseFloat(longitude),
+      );
+
+      res.status(201).json(vehicle);
+      console.log("vehicle Added");
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });

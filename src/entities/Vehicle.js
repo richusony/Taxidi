@@ -19,7 +19,9 @@ export class Vehicle {
     vehicleImages,
     insuranceCertificateImage,
     pollutionCertificateImage,
-    rent
+    rent,
+    latitude,
+    longitude
   ) {
     this.id = id;
     this.model = model;
@@ -41,12 +43,14 @@ export class Vehicle {
     this.insuranceCertificateImage = insuranceCertificateImage;
     this.pollutionCertificateImage = pollutionCertificateImage;
     this.rent = rent;
+    this.latitude = latitude;
+    this.longitude = longitude;
   }
 
   // Method to validate vehicle data
   validate() {
-    console.log(this.model,this.vehicleRegistrationNumber, this.host);
-    if (!this.model || !this.vehicleRegistrationNumber || !this.host) {
+    // console.log(this.model,this.vehicleRegistrationNumber, this.host);
+    if (!this.model || !this.vehicleRegistrationNumber || !this.host || !this.latitude || !this.longitude) {
       throw new Error("Fill all the required fields - Vehicle Entity");
     }
   }

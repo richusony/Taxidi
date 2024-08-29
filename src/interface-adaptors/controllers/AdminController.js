@@ -92,7 +92,7 @@ export class AdminController {
   }
 
   async getBookings(req, res) {
-    const {limit,skip} = req.query;
+    const { limit, skip } = req.query;
     try {
       const bookings = await this.adminUseCase.getBookings(limit, skip);
       console.log("admin fetched today's bookings");
@@ -144,6 +144,67 @@ export class AdminController {
         console.log("booking cancel notification send to user", receiverId);
       }
       res.status(200).json(bookings);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async updateVehicle(req, res) {
+    try {
+      const {
+        vehicleId,
+        color,
+        mileage,
+        rent,
+        city,
+        pincode,
+        pickUpLocation,
+        latitude,
+        longitude,
+        lastServiceDate,
+        locationText,
+      } = req.body;
+
+      const update = await this.adminUseCase.updateVehicle(
+        vehicleId,
+        color,
+        mileage,
+        rent,
+        city,
+        pincode,
+        pickUpLocation,
+        latitude,
+        longitude,
+        lastServiceDate,
+        locationText,
+      );
+      console.log(update?.model, "vehilce updated");
+      res.status(200).json(update);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async listVehicle(req, res) {
+    const { vehicleId } = req.params;
+    try {
+      const list = await this.adminUseCase.listVehicle(vehicleId);
+      console.log("vehicle listed", vehicleId);
+      res.status(200).json(list);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async unListVehicle(req, res) {
+    const { vehicleId } = req.params;
+    try {
+      const list = await this.adminUseCase.unListVehicle(vehicleId);
+      console.log("vehicle unlisted", vehicleId);
+      res.status(200).json(list);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
