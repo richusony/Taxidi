@@ -26,6 +26,12 @@ export class UserRepository {
     });
 
     await userModel.save();
+
+    await UserWalletModel.create({
+      userId: userModel._id,
+      balance: 0
+    });
+
     return userModel;
   }
 

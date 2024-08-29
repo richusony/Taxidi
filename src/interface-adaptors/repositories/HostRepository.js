@@ -28,6 +28,11 @@ export class HostRepository {
       blocked: host.blocked,
     });
     await hostModel.save();
+
+    await HostWalletModel.create({
+      hostId: hostModel._id,
+      balance: 0,
+    });
     return hostModel;
   }
 
