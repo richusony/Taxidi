@@ -13,8 +13,12 @@ export class HostUseCase {
         return await this.hostRepository.getCarDetails(vehicleNumber);
     }
 
-    async getAllBookings(hostId) {
-        return await this.hostRepository.getAllBookings(hostId);
+    async getTodayBookings(hostId, limit, skip) {
+        return await this.hostRepository.getTodayBookings(hostId, limit, skip);
+    }
+
+    async getAllBookings(hostId, limit, skip) {
+        return await this.hostRepository.getAllBookings(hostId, limit, skip);
     }
 
     async getBookingDetails(paymentId) {

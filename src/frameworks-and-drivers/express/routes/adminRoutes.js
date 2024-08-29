@@ -285,6 +285,13 @@ router.get("/booking-details/:paymentId", adminProtectRoute, verifyRole("admin")
   adminController.getBookingDetails(req, res);
 });
 
+router.get("/booking-history", adminProtectRoute, verifyRole("admin"), (req, res) => {
+  const useCase = new AdminUseCase(adminRepository);
+  const adminController = new AdminController(useCase);
+
+  adminController.getBookingHistory(req, res);
+});
+
 router.post("/cancel-booking", adminProtectRoute, verifyRole("admin"), (req, res) => {
   const useCase = new AdminUseCase(adminRepository);
   const adminController = new AdminController(useCase);

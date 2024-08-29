@@ -51,7 +51,10 @@ export class AdminRepository {
     paymentMethod,
   ) {
     try {
-      const addToWallet = await AdminWalletModel.findOneAndUpdate({ adminId }, { $inc: { balance: commissionToAdmin } });
+      const addToWallet = await AdminWalletModel.findOneAndUpdate(
+        { adminId },
+        { $inc: { balance: commissionToAdmin } },
+      );
 
       const addToTransactions = await AdminTransactionModel.create({
         adminId: adminId,
@@ -63,7 +66,7 @@ export class AdminRepository {
         paymentId: paymentId,
         vehicleId: vehicleId,
         paymentMethod: paymentMethod,
-        credited: true
+        credited: true,
       });
 
       return addToWallet;
@@ -78,7 +81,7 @@ export class AdminRepository {
       return await MessageModel.create({
         message: msg,
         msgFrom: from,
-        msgTo: to
+        msgTo: to,
       });
     } catch (error) {
       console.log(error.message);
@@ -91,13 +94,10 @@ export class AdminRepository {
       return await MessageModel.aggregate([
         {
           $match: {
-            $or: [
-              { msgFrom: hostEmail },
-              { msgTo: hostEmail }
-            ]
-          }
-        }
-      ])
+            $or: [{ msgFrom: hostEmail }, { msgTo: hostEmail }],
+          },
+        },
+      ]);
     } catch (error) {
       console.log(error);
       throw error;
@@ -118,8 +118,7 @@ export class AdminRepository {
     const skipItems = parseInt(skip);
 
     try {
-      return await AdminTransactionModel
-        .find({ adminId })
+      return await AdminTransactionModel.find({ adminId })
         .skip(skipItems)
         .limit(limitItems)
         .sort({ createdAt: -1 });
@@ -149,7 +148,13 @@ export class AdminRepository {
         },
       });
 
-      return { brandCount, bodyTypeCount, hostCount, vehicleCount, todayBookingsCount };
+      return {
+        brandCount,
+        bodyTypeCount,
+        hostCount,
+        vehicleCount,
+        todayBookingsCount,
+      };
     } catch (error) {
       console.log(error);
       throw error;
@@ -161,7 +166,7 @@ export class AdminRepository {
     try {
       let aggregationPipeline = [];
 
-      if (filter === 'monthly') {
+      if (filter === "monthly") {
         // Aggregate monthly sales
         aggregationPipeline = [
           {
@@ -177,7 +182,7 @@ export class AdminRepository {
             },
           },
         ];
-      } else if (filter === 'yearly') {
+      } else if (filter === "yearly") {
         // Aggregate yearly sales
         aggregationPipeline = [
           {
@@ -194,16 +199,19 @@ export class AdminRepository {
         // Handle other filters if needed
       }
 
-      const salesData = await VehicleBookingModel.aggregate(aggregationPipeline);
+      const salesData =
+        await VehicleBookingModel.aggregate(aggregationPipeline);
 
       // Format data for the chart
       const formattedData = {
-        labels: salesData.map(entry =>
+        labels: salesData.map((entry) =>
           filter === "monthly"
-            ? moment(`${entry._id.year}-${entry._id.month}`, "YYYY-MM").format("MMMM YYYY")
-            : entry._id.toString()
+            ? moment(`${entry._id.year}-${entry._id.month}`, "YYYY-MM").format(
+                "MMMM YYYY",
+              )
+            : entry._id.toString(),
         ),
-        data: salesData.map(entry => entry.totalSales),
+        data: salesData.map((entry) => entry.totalSales),
       };
 
       return formattedData;
@@ -213,7 +221,10 @@ export class AdminRepository {
     }
   }
 
-  async getBookings() {
+  async getBookings(limit, skip) {
+    const limitItems = parseInt(limit);
+    const skipItems = parseInt(skip);
+
     const date = new Date();
 
     const startOfDay = new Date();
@@ -223,11 +234,31 @@ export class AdminRepository {
     endOfDay.setHours(23, 59, 59, 999); // Set time to the end of the day
     try {
       return await VehicleBookingModel.find({
-        hostId: "66a8b7d061ac1b9151567e6c", createdAt: {
+        hostId: "66a8b7d061ac1b9151567e6c",
+        createdAt: {
           $gte: startOfDay,
           $lt: endOfDay,
-        }
-      }).populate(["paidBy", "hostId", "vehicleId"]);
+        },
+      })
+        .populate(["paidBy", "hostId", "vehicleId"])
+        .skip(skipItems)
+        .limit(limitItems)
+        .sort({ createdAt: -1 });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async getBookingHistory(limit, skip) {
+    const limitItems = parseInt(limit);
+    const skipItems = parseInt(skip);
+    try {
+      return await VehicleBookingModel.find({})
+        .populate(["paidBy", "hostId", "vehicleId"])
+        .skip(skipItems)
+        .limit(limitItems)
+        .sort({ createdAt: -1 });
     } catch (error) {
       console.log(error);
       throw error;
@@ -243,28 +274,28 @@ export class AdminRepository {
             from: "vehicles",
             localField: "vehicleId",
             foreignField: "_id",
-            as: "vehicleDetails"
-          }
+            as: "vehicleDetails",
+          },
         },
         {
-          $unwind: "$vehicleDetails" // Flatten the array to access nested fields
+          $unwind: "$vehicleDetails", // Flatten the array to access nested fields
         },
         {
           $lookup: {
             from: "hosts",
             localField: "hostId",
             foreignField: "_id",
-            as: "hostDetails"
-          }
+            as: "hostDetails",
+          },
         },
         {
           $lookup: {
             from: "brands",
             localField: "vehicleDetails.brand",
             foreignField: "_id",
-            as: "brandDetails"
-          }
-        }
+            as: "brandDetails",
+          },
+        },
       ]);
     } catch (error) {
       console.log(error);
@@ -275,17 +306,22 @@ export class AdminRepository {
   async cancelBooking(paymentId, cancelReason, adminId) {
     try {
       const findBooking = await VehicleBookingModel.findOne({ paymentId });
-      if (!findBooking) throw new Error("No Booking Found on this Payment Id", paymentId);
+      if (!findBooking)
+        throw new Error("No Booking Found on this Payment Id", paymentId);
 
-      if (findBooking.bookingStatus === false) throw new Error("Booking already cancelled", paymentId);
+      if (findBooking.bookingStatus === false)
+        throw new Error("Booking already cancelled", paymentId);
 
       findBooking.bookingCancelReason = cancelReason;
       findBooking.bookingStatus = false;
       const booking = await findBooking.save();
 
-      await UserWalletModel.findOneAndUpdate({ userId: findBooking.paidBy }, {
-        $inc: { balance: findBooking.totalAmount }
-      });
+      await UserWalletModel.findOneAndUpdate(
+        { userId: findBooking.paidBy },
+        {
+          $inc: { balance: findBooking.totalAmount },
+        },
+      );
 
       let payId = await generatePaymentIdString("pay_", 8);
 
@@ -295,12 +331,15 @@ export class AdminRepository {
         paymentMessage: "Refund from cancelled booking",
         paymentMethod: "wallet",
         userId: findBooking.paidBy,
-        credited: true
+        credited: true,
       });
 
-      await AdminWalletModel.findOneAndUpdate({ adminId }, {
-        $inc: { balance: -findBooking.commissionToAdmin }
-      });
+      await AdminWalletModel.findOneAndUpdate(
+        { adminId },
+        {
+          $inc: { balance: -findBooking.commissionToAdmin },
+        },
+      );
 
       payId = await generatePaymentIdString("pay_", 8);
 
@@ -314,12 +353,15 @@ export class AdminRepository {
         paymentId: payId,
         vehicleId: findBooking.vehicleId,
         paymentMethod: "wallet",
-        credited: false
+        credited: false,
       });
 
-      await HostWalletModel.findOneAndUpdate({ hostId: findBooking.hostId }, {
-        $inc: { balance: -findBooking.balanceAfterCommission }
-      });
+      await HostWalletModel.findOneAndUpdate(
+        { hostId: findBooking.hostId },
+        {
+          $inc: { balance: -findBooking.balanceAfterCommission },
+        },
+      );
 
       payId = await generatePaymentIdString("pay_", 8);
 
@@ -337,7 +379,7 @@ export class AdminRepository {
 
       await UserNotificationModel.create({
         context: cancelReason,
-        userId: findBooking.paidBy
+        userId: findBooking.paidBy,
       });
 
       return booking;

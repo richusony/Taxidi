@@ -3,7 +3,7 @@ import {
   sendHostApprovalMail,
   sendHostRejectionMail,
 } from "../../frameworks-and-drivers/external-lib/emailService.js";
-import { getReceiverSocketId, io } from "../../socket.js"
+import { getReceiverSocketId, io } from "../../socket.js";
 import { uploadImages } from "../../frameworks-and-drivers/external-lib/imageUpload.js";
 import { passwordHashing } from "../../frameworks-and-drivers/external-lib/passwordHashing.js";
 
@@ -188,7 +188,7 @@ export default class HostController {
       await sendHostRejectionMail(email, rejectMsg);
       console.log(error.message);
       res.status(400).json({ error: error.message });
-    } catch (error) { }
+    } catch (error) {}
   }
 
   async getAllHosts(req, res) {
@@ -352,11 +352,35 @@ export default class HostController {
     }
   }
 
+  async getTodayBookings(req, res) {
+    const hostId = req.hostDetails._id;
+    const hostName = req.hostDetails.fullname;
+    const { limit, skip } = req.query;
+    try {
+      const bookings = await this.hostUseCase.getTodayBookings(
+        hostId,
+        limit,
+        skip,
+      );
+      // console.log(bookings);
+      console.log("fetched all bookings of host:", hostName);
+      res.status(200).json(bookings);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
   async getAllBookings(req, res) {
     const hostId = req.hostDetails._id;
     const hostName = req.hostDetails.fullname;
+    const { limit, skip } = req.query;
     try {
-      const bookings = await this.hostUseCase.getAllBookings(hostId);
+      const bookings = await this.hostUseCase.getAllBookings(
+        hostId,
+        limit,
+        skip,
+      );
       // console.log(bookings);
       console.log("fetched all bookings of host:", hostName);
       res.status(200).json(bookings);
@@ -419,7 +443,11 @@ export default class HostController {
     const { limit, skip } = req.query;
 
     try {
-      const history = await this.hostUseCase.getWalletHistory(hostId, limit, skip);
+      const history = await this.hostUseCase.getWalletHistory(
+        hostId,
+        limit,
+        skip,
+      );
       console.log("fetched host wallet history by", hostId);
       res.status(200).json(history);
     } catch (error) {
@@ -434,7 +462,11 @@ export default class HostController {
     const { message } = req.body;
 
     try {
-      const sending = await this.hostUseCase.sendMessageToAdmin(hostEmail, message, admin);
+      const sending = await this.hostUseCase.sendMessageToAdmin(
+        hostEmail,
+        message,
+        admin,
+      );
       const receiverId = await getReceiverSocketId(admin);
 
       if (receiverId) {
@@ -475,7 +507,7 @@ export default class HostController {
         latitude,
         longitude,
         lastServiceDate,
-        locationText
+        locationText,
       } = req.body;
 
       const update = await this.hostUseCase.updateVehicle(
@@ -490,7 +522,8 @@ export default class HostController {
         latitude,
         longitude,
         lastServiceDate,
-        locationText);
+        locationText,
+      );
       console.log(update?.model, "vehilce updated");
       res.status(200).json(update);
     } catch (error) {

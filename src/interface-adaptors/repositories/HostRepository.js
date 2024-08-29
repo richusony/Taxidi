@@ -123,9 +123,12 @@ export class HostRepository {
     paymentMethod,
   ) {
     try {
-      const addToWallet = await HostWalletModel.findOneAndUpdate({ hostId }, {
-        $inc: { balance: balanceAfterCommission }
-      });
+      const addToWallet = await HostWalletModel.findOneAndUpdate(
+        { hostId },
+        {
+          $inc: { balance: balanceAfterCommission },
+        },
+      );
 
       const addToTransactions = await HostTransactionModel.create({
         balanceAfterCommission: balanceAfterCommission,
@@ -136,7 +139,7 @@ export class HostRepository {
         paymentId: paymentId,
         vehicleId: vehicleId,
         paymentMethod: paymentMethod,
-        credited: true
+        credited: true,
       });
       const addToBookings = await VehicleBookingModel.create({
         balanceAfterCommission: balanceAfterCommission,
@@ -148,7 +151,7 @@ export class HostRepository {
         vehicleId: vehicleId,
         paymentMethod: paymentMethod,
         bookingStarts: tripStarts,
-        bookingEnds: tripEnds
+        bookingEnds: tripEnds,
       });
 
       return addToWallet;
@@ -160,14 +163,16 @@ export class HostRepository {
 
   async getAllUserBookings(userId) {
     try {
-      return await VehicleBookingModel.find({ paidBy: userId }).sort({ createdAt: -1 }).populate(["hostId", "vehicleId"]);
+      return await VehicleBookingModel.find({ paidBy: userId })
+        .sort({ createdAt: -1 })
+        .populate(["hostId", "vehicleId"]);
     } catch (error) {
       console.log(error.message);
       throw error;
     }
   }
 
-  async getBookingDetails(paymentId) {
+  async getBookingDetails(paymentId, limit, skip) {
     try {
       // return await VehicleBookingModel.findOne({ paymentId }).populate(["hostId", "vehicleId"]);
       return await VehicleBookingModel.aggregate([
@@ -177,28 +182,28 @@ export class HostRepository {
             from: "vehicles",
             localField: "vehicleId",
             foreignField: "_id",
-            as: "vehicleDetails"
-          }
+            as: "vehicleDetails",
+          },
         },
         {
-          $unwind: "$vehicleDetails" // Flatten the array to access nested fields
+          $unwind: "$vehicleDetails", // Flatten the array to access nested fields
         },
         {
           $lookup: {
             from: "hosts",
             localField: "hostId",
             foreignField: "_id",
-            as: "hostDetails"
-          }
+            as: "hostDetails",
+          },
         },
         {
           $lookup: {
             from: "brands",
             localField: "vehicleDetails.brand",
             foreignField: "_id",
-            as: "brandDetails"
-          }
-        }
+            as: "brandDetails",
+          },
+        },
       ]);
     } catch (error) {
       console.log(error.message);
@@ -206,7 +211,57 @@ export class HostRepository {
     }
   }
 
-  async getAllBookings(hostId) {
+  async getTodayBookings(hostId, limit, skip) {
+    const limitItems = parseInt(limit);
+    const skipItems = parseInt(skip);
+    const date = new Date();
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0); // Set time to the start of the day
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999); // Set time to the end of the day
+    try {
+      return await VehicleBookingModel.aggregate([
+        {
+          $match: {
+            hostId,
+            createdAt: {
+              $gte: startOfDay,
+              $lt: endOfDay,
+            },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "paidBy",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "vehicles",
+            localField: "vehicleId",
+            foreignField: "_id",
+            as: "vehicleDetails",
+          },
+        },
+        {
+          $skip: skipItems,
+        },
+        { $limit: limitItems },
+      ]);
+    } catch (error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
+
+  async getAllBookings(hostId, limit, skip) {
+    const limitItems = parseInt(limit);
+    const skipItems = parseInt(skip);
     try {
       return await VehicleBookingModel.aggregate([
         { $match: { hostId } },
@@ -216,17 +271,21 @@ export class HostRepository {
             from: "users",
             localField: "paidBy",
             foreignField: "_id",
-            as: "userDetails"
-          }
+            as: "userDetails",
+          },
         },
         {
           $lookup: {
             from: "vehicles",
             localField: "vehicleId",
             foreignField: "_id",
-            as: "vehicleDetails"
-          }
-        }
+            as: "vehicleDetails",
+          },
+        },
+        {
+          $skip: skipItems,
+        },
+        { $limit: limitItems },
       ]);
     } catch (error) {
       console.log(error.message);
@@ -238,17 +297,22 @@ export class HostRepository {
     const adminId = "668b183d01b691981bcaa102";
     try {
       const findBooking = await VehicleBookingModel.findOne({ paymentId });
-      if (!findBooking) throw new Error("No Booking Found on this Payment Id", paymentId);
+      if (!findBooking)
+        throw new Error("No Booking Found on this Payment Id", paymentId);
 
-      if (findBooking.bookingStatus === false) throw new Error("Booking already cancelled", paymentId);
+      if (findBooking.bookingStatus === false)
+        throw new Error("Booking already cancelled", paymentId);
 
       findBooking.bookingCancelReason = cancelReason;
       findBooking.bookingStatus = false;
       const booking = await findBooking.save();
 
-      await UserWalletModel.findOneAndUpdate({ userId: findBooking.paidBy }, {
-        $inc: { balance: findBooking.totalAmount }
-      });
+      await UserWalletModel.findOneAndUpdate(
+        { userId: findBooking.paidBy },
+        {
+          $inc: { balance: findBooking.totalAmount },
+        },
+      );
 
       let payId = await generatePaymentIdString("pay_", 8);
 
@@ -258,12 +322,15 @@ export class HostRepository {
         paymentMessage: "Refund from cancelled booking",
         paymentMethod: "wallet",
         userId: findBooking.paidBy,
-        credited: true
+        credited: true,
       });
 
-      await AdminWalletModel.findOneAndUpdate({ adminId }, {
-        $inc: { balance: -findBooking.commissionToAdmin }
-      });
+      await AdminWalletModel.findOneAndUpdate(
+        { adminId },
+        {
+          $inc: { balance: -findBooking.commissionToAdmin },
+        },
+      );
 
       payId = await generatePaymentIdString("pay_", 8);
 
@@ -277,12 +344,15 @@ export class HostRepository {
         paymentId: payId,
         vehicleId: vehicleId,
         paymentMethod: "wallet",
-        credited: false
+        credited: false,
       });
 
-      await HostWalletModel.findOneAndUpdate({ hostId: findBooking.hostId }, {
-        $inc: { balance: -findBooking.balanceAfterCommission }
-      });
+      await HostWalletModel.findOneAndUpdate(
+        { hostId: findBooking.hostId },
+        {
+          $inc: { balance: -findBooking.balanceAfterCommission },
+        },
+      );
 
       payId = await generatePaymentIdString("pay_", 8);
 
@@ -300,7 +370,7 @@ export class HostRepository {
 
       await UserNotification.create({
         context: cancelReason,
-        userId: findBooking.paidBy
+        userId: findBooking.paidBy,
       });
 
       return booking;
@@ -323,8 +393,7 @@ export class HostRepository {
     const limitItems = parseInt(limit);
     const skipItems = parseInt(skip);
     try {
-      return await HostTransactionModel
-        .find({ hostId })
+      return await HostTransactionModel.find({ hostId })
         .skip(skipItems)
         .limit(limitItems)
         .sort({ createdAt: -1 });
@@ -339,7 +408,7 @@ export class HostRepository {
       return await MessageModel.create({
         msgFrom: from,
         message: msg,
-        msgTo: to
+        msgTo: to,
       });
     } catch (error) {
       console.log(error.message);
@@ -352,13 +421,10 @@ export class HostRepository {
       return await MessageModel.aggregate([
         {
           $match: {
-            $or: [
-              { msgFrom: hostEmail },
-              { msgTo: hostEmail }
-            ]
-          }
-        }
-      ])
+            $or: [{ msgFrom: hostEmail }, { msgTo: hostEmail }],
+          },
+        },
+      ]);
     } catch (error) {
       console.log(error.message);
       throw error;
@@ -377,21 +443,25 @@ export class HostRepository {
     latitude,
     longitude,
     lastServiceDate,
-    locationText) {
+    locationText,
+  ) {
     try {
-      return await VehicleModel.findByIdAndUpdate({ _id: vehicleId }, {
-        mileage,
-        seats,
-        color,
-        rent,
-        city,
-        pincode,
-        pickUpLocation,
-        latitude,
-        longitude,
-        lastServiceDate,
-        locationText
-      });
+      return await VehicleModel.findByIdAndUpdate(
+        { _id: vehicleId },
+        {
+          mileage,
+          seats,
+          color,
+          rent,
+          city,
+          pincode,
+          pickUpLocation,
+          latitude,
+          longitude,
+          lastServiceDate,
+          locationText,
+        },
+      );
     } catch (error) {
       console.log(error.message);
       throw error;
@@ -457,7 +527,7 @@ export class HostRepository {
   async getChartData(filter, hostId) {
     let aggregationPipeline = [];
 
-    if (filter === 'monthly') {
+    if (filter === "monthly") {
       // Aggregate monthly sales
       aggregationPipeline = [
         {
@@ -473,7 +543,7 @@ export class HostRepository {
           },
         },
       ];
-    } else if (filter === 'yearly') {
+    } else if (filter === "yearly") {
       // Aggregate yearly sales
       aggregationPipeline = [
         {
@@ -494,12 +564,14 @@ export class HostRepository {
 
     // Format data for the chart
     const formattedData = {
-      labels: salesData.map(entry =>
+      labels: salesData.map((entry) =>
         filter === "monthly"
-          ? moment(`${entry._id.year}-${entry._id.month}`, "YYYY-MM").format("MMMM YYYY")
-          : entry._id.toString()
+          ? moment(`${entry._id.year}-${entry._id.month}`, "YYYY-MM").format(
+              "MMMM YYYY",
+            )
+          : entry._id.toString(),
       ),
-      data: salesData.map(entry => entry.totalSales),
+      data: salesData.map((entry) => entry.totalSales),
     };
 
     return formattedData;
