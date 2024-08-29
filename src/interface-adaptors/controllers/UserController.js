@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import Razorpay from "razorpay";
 import { getReceiverSocketId, io } from "../../socket.js";
+import { generatePaymentIdString } from "../../utils/helper.js";
 
 export class UserController {
   constructor(userUseCase) {
@@ -225,6 +226,42 @@ export class UserController {
     }
   }
 
+  async bookingUsingWallet(req, res) {
+    const userId = req.user._id;
+    const { amount, vehicleId, queryStartDate, queryEndDate } = req.body;
+    const paymentId = await generatePaymentIdString("pay_",8);
+    const paymentMethod = "wallet";
+    const amt = parseFloat(amount) * 100;
+
+    const verifyPayment = {
+      id: paymentId,
+      method: paymentMethod,
+      amount: amt
+    }
+    try {
+      // const razorpay = new Razorpay({
+      //   key_id: process.env.RAZOR_PAY_KEY_ID,
+      //   key_secret: process.env.RAZOR_PAY_SECRET_KEY,
+      // });
+
+      // const verifyPayment = await razorpay.payments.fetch(
+      //   paymentDetails.razorpay_payment_id,
+      // );
+
+      const saveTransactions = await this.userUseCase.saveTransactions(
+        userId,
+        vehicleId,
+        queryStartDate,
+        queryEndDate,
+        verifyPayment,
+      );
+      console.log("booking of vehicle :", vehicleId, "by", userId, "has been successfull");
+      res.status(200).json(saveTransactions);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
   async verifyBooking(req, res) {
     const userId = req.user._id;
     const { paymentDetails, vehicleId, queryStartDate, queryEndDate } =
@@ -296,6 +333,7 @@ export class UserController {
         verifyPayment.method,
         "Added to Wallet",
       );
+      res.status(200).json(addToWallet);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });

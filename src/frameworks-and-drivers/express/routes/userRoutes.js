@@ -123,6 +123,21 @@ router.post("/verify-booking", protectRoute, verifyRole("user"), (req, res) => {
   userController.verifyBooking(req, res);
 });
 
+router.post("/book-vehicle-wallet", protectRoute, verifyRole("user"), (req, res) => {
+  const vehicleRepository = new VehicleRepository();
+  const adminRepository = new AdminRepository();
+  const hostRepository = new HostRepository();
+  const userUseCase = new BookingUseCase(
+    userRepository,
+    adminRepository,
+    vehicleRepository,
+    hostRepository,
+  );
+  const userController = new UserController(userUseCase);
+
+  userController.bookingUsingWallet(req, res);
+});
+
 router.post("/add-to-wallet", protectRoute, verifyRole("user"), (req, res) => {
   const userController = new UserController();
   userController.addMoneyToWallet(req, res);

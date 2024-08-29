@@ -79,7 +79,7 @@ export class UserRepository {
 
       const addToNotifications = await UserNotificationModel.create({
         context: "Your license has been approved. Enjoy booking",
-        userId
+        userId,
       });
 
       return updateUser;
@@ -121,13 +121,13 @@ export class UserRepository {
     paymentMethod,
     paymentMessage,
   ) {
-    console.log("userRep", userId, paymentId, amount, paymentMethod, paymentMessage);
     try {
-      const addToWallet = await UserWalletModel.updateOne(
+      const addToWallet = await UserWalletModel.findOneAndUpdate(
         { userId },
         {
           $inc: { balance: amount },
         },
+        { new: true },
       );
 
       const addtoTransactions = await UserTransactionModel.create({
@@ -157,7 +157,9 @@ export class UserRepository {
 
   async getAllUserNotifications(userId) {
     try {
-      return await UserNotificationModel.find({ userId }).sort({ createdAt: -1 })
+      return await UserNotificationModel.find({ userId }).sort({
+        createdAt: -1,
+      });
     } catch (error) {
       console.log(error.message);
       throw error;
@@ -174,11 +176,15 @@ export class UserRepository {
   }
 
   async getWalletHistory(userId, limit, skip) {
-
     try {
       const limitItems = parseInt(limit);
       const skipItems = parseInt(skip);
-      return await UserTransactionModel.find({ userId, paymentMethod: "wallet" }).skip(skipItems).limit(limitItems).sort({ createdAt: -1 });
+      return await UserTransactionModel.find({
+        userId
+      })
+        .skip(skipItems)
+        .limit(limitItems)
+        .sort({ createdAt: -1 });
     } catch (error) {
       console.log(error.message);
       throw error;
@@ -197,24 +203,38 @@ export class UserRepository {
       // Parse the booking start date from ISO 8601 format
       const bookingStarts = new Date(findBooking.bookingStarts);
       if (isNaN(bookingStarts.getTime())) {
-        throw new Error('Invalid booking start date');
+        throw new Error("Invalid booking start date");
       }
 
       // Check if the current date and time is past the booking start date
       if (bookingStarts <= date) {
-        throw new Error("Can't cancel booking at or after the trip starting date");
+        throw new Error(
+          "Can't cancel booking at or after the trip starting date",
+        );
       }
 
-      const cancellBooking = await VehicleBookingModel.findOneAndUpdate({ paymentId }, { bookingStatus: false });
+      const cancellBooking = await VehicleBookingModel.findOneAndUpdate(
+        { paymentId },
+        { bookingStatus: false },
+      );
       const totalAmount = cancellBooking.totalAmount;
       const commissionToAdmin = cancellBooking.commissionToAdmin;
       const balanceAfterCommission = cancellBooking.balanceAfterCommission;
 
       // reduce amount from both admin and host wallet
-      await AdminWalletModel.findOneAndUpdate({ adminId }, { $inc: { balance: -commissionToAdmin } });
-      await HostWalletModel.findOneAndUpdate({ hostId: cancellBooking.hostId }, { $inc: { balance: -balanceAfterCommission } });
+      await AdminWalletModel.findOneAndUpdate(
+        { adminId },
+        { $inc: { balance: -commissionToAdmin } },
+      );
+      await HostWalletModel.findOneAndUpdate(
+        { hostId: cancellBooking.hostId },
+        { $inc: { balance: -balanceAfterCommission } },
+      );
 
-      await UserWalletModel.findOneAndUpdate({ userId: cancellBooking.paidBy }, { $inc: { balance: totalAmount } });
+      await UserWalletModel.findOneAndUpdate(
+        { userId: cancellBooking.paidBy },
+        { $inc: { balance: totalAmount } },
+      );
       const payId = await generatePaymentIdString("pay_", 8);
 
       await UserTransactionModel.create({
@@ -223,7 +243,7 @@ export class UserRepository {
         paymentMessage: "Refund from cancelled booking",
         paymentMethod: "wallet",
         userId: cancellBooking.paidBy,
-        credited: true
+        credited: true,
       });
 
       await AdminTransactionModel.create({
@@ -235,7 +255,7 @@ export class UserRepository {
         totalAmount,
         vehicleId: cancellBooking.vehicleId,
         paymentMethod: "wallet",
-        credited: false
+        credited: false,
       });
 
       await HostTransactionModel.create({
@@ -248,12 +268,12 @@ export class UserRepository {
         hostId: cancellBooking.hostId,
         vehicleId: cancellBooking.vehicleId,
         paymentMethod: "wallet",
-        credited: false
+        credited: false,
       });
 
       await UserNotificationModel.create({
         context: `Booking has been cancelled. ${totalAmount} credited to your wallet`,
-        userId: cancellBooking.paidBy
+        userId: cancellBooking.paidBy,
       });
 
       return cancellBooking;

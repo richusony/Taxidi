@@ -60,7 +60,18 @@ export class VehicleRepository {
     return await VehicleModel.find({}).populate(["host", "brand", "bodyType"]);
   }
 
-  async getAllAvailableCars(brand, bodyType, fuel, priceRange, bookingStartsString, bookingEndsString, latitude, longitude, limit, skip) {
+  async getAllAvailableCars(
+    brand,
+    bodyType,
+    fuel,
+    priceRange,
+    bookingStartsString,
+    bookingEndsString,
+    latitude,
+    longitude,
+    limit,
+    skip,
+  ) {
     const bookingStarts = new Date(`${bookingStartsString}:00Z`); // Appending seconds and time zone
     const bookingEnds = new Date(`${bookingEndsString}:00Z`);
 
@@ -71,25 +82,26 @@ export class VehicleRepository {
           $match: {
             bookingStarts: { $lte: bookingEnds },
             bookingEnds: { $gte: bookingStarts },
-            bookingStatus: true
-          }
+            bookingStatus: true,
+          },
         },
         {
           $group: {
             _id: null,
-            vehicleIds: { $addToSet: "$vehicleId" }
-          }
+            vehicleIds: { $addToSet: "$vehicleId" },
+          },
         },
         {
           $project: {
             _id: 0,
-            vehicleIds: 1
-          }
-        }
+            vehicleIds: 1,
+          },
+        },
       ]);
       // console.log("bookedVehicless ", bookedVehicleIds)
       // Extract vehicle IDs from the aggregation result
-      const vehicleIds = bookedVehicleIds.length > 0 ? bookedVehicleIds[0].vehicleIds : [];
+      const vehicleIds =
+        bookedVehicleIds.length > 0 ? bookedVehicleIds[0].vehicleIds : [];
 
       // Step 2: Create filter object based on provided parameters
       const filter = {
@@ -97,8 +109,10 @@ export class VehicleRepository {
         availabilityStatus: true, // Assuming this field indicates availability
       };
       // console.log("filter", filter)
-      if (brand && brand !== "None") filter.brand = new mongoose.Types.ObjectId(brand);
-      if (bodyType && bodyType !== "None") filter.bodyType = new mongoose.Types.ObjectId(bodyType);
+      if (brand && brand !== "None")
+        filter.brand = new mongoose.Types.ObjectId(brand);
+      if (bodyType && bodyType !== "None")
+        filter.bodyType = new mongoose.Types.ObjectId(bodyType);
       if (fuel && fuel !== "None") filter.fuel = fuel;
 
       // Handle price range
@@ -109,16 +123,18 @@ export class VehicleRepository {
         // Filter by price range
         filter.rent = {
           $gte: minPrice,
-          $lte: maxPrice
+          $lte: maxPrice,
         };
       }
 
       // Ensure latitude and longitude are numbers
-      const parsedLatitude = parseFloat(latitude);
-      const parsedLongitude = parseFloat(longitude);
-      if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
-        throw new Error('Invalid latitude or longitude');
-      }
+      const parsedLatitude =
+        latitude !== undefined ? parseFloat(latitude) : 11.8653;
+      const parsedLongitude =
+        longitude !== undefined ? parseFloat(longitude) : 75.352;
+      // if (isNaN(parsedLatitude) || isNaN(parsedLongitude)) {
+      //   throw new Error('Invalid latitude or longitude');
+      // }
 
       // Step 3: Apply geospatial query and filters
       const availableCars = await VehicleModel.find(filter)
@@ -126,10 +142,10 @@ export class VehicleRepository {
         .near({
           center: {
             type: "Point",
-            coordinates: [parsedLongitude, parsedLatitude]
+            coordinates: [parsedLongitude, parsedLatitude],
           },
           maxDistance: 20000, // Set a maximum distance in meters
-          spherical: true
+          spherical: true,
         })
         .populate(["brand", "bodyType"]) // Populate fields as needed
         .limit(parseInt(limit))
@@ -138,7 +154,7 @@ export class VehicleRepository {
       // console.log("response :", availableCars);
       return availableCars;
     } catch (error) {
-      console.error('Error fetching available cars:', error);
+      console.error("Error fetching available cars:", error);
       throw error;
     }
   }
@@ -165,23 +181,21 @@ export class VehicleRepository {
     commissionToAdmin,
     balanceAfterCommission,
     queryStartDate,
-    queryEndDate
+    queryEndDate,
   ) {
     try {
-      const bookVehicle = await VehicleBookingModel.create(
-        {
-          paymentId,
-          hostId,
-          totalAmount,
-          paymentMethod,
-          paidBy: userId,
-          vehicleId,
-          commissionToAdmin,
-          balanceAfterCommission,
-          bookingStarts: queryStartDate,
-          bookingEnds: queryEndDate
-        },
-      );
+      const bookVehicle = await VehicleBookingModel.create({
+        paymentId,
+        hostId,
+        totalAmount,
+        paymentMethod,
+        paidBy: userId,
+        vehicleId,
+        commissionToAdmin,
+        balanceAfterCommission,
+        bookingStarts: queryStartDate,
+        bookingEnds: queryEndDate,
+      });
 
       return bookVehicle;
     } catch (error) {
@@ -203,9 +217,8 @@ export class VehicleRepository {
         cleanliness: Number(rating.cleanliness),
         maintenance: Number(rating.maintenance),
         convenience: Number(rating.convenience),
-        timing: Number(rating.timing)
+        timing: Number(rating.timing),
       });
-      
     } catch (error) {
       console.log(error.message);
       throw error;
@@ -217,7 +230,9 @@ export class VehicleRepository {
       const vehicle = await VehicleModel.findOne({ vehicleRegistrationNumber });
       if (!vehicle) throw new Error("vehicle not found - VehicleRepository");
 
-      const reviews = await VehicleReviewModel.find({ vehicleId: vehicle._id }).populate(["userId", "vehicleId"]);
+      const reviews = await VehicleReviewModel.find({
+        vehicleId: vehicle._id,
+      }).populate(["userId", "vehicleId"]);
       const rating = await VehicleRatingModel.aggregate([
         { $match: { vehicleId: vehicle._id } },
         {
@@ -227,8 +242,8 @@ export class VehicleRepository {
             Maintenance: { $avg: "$maintenance" },
             Convenience: { $avg: "$convenience" },
             Timing: { $avg: "$timing" },
-            TotalNumberOfRatings: { $sum: 1 }
-          }
+            TotalNumberOfRatings: { $sum: 1 },
+          },
         },
         {
           $project: {
@@ -238,16 +253,11 @@ export class VehicleRepository {
             Convenience: 1,
             Timing: 1,
             TotalAverage: {
-              $avg: [
-                "$Cleanliness",
-                "$Maintenance",
-                "$Convenience",
-                "$Timing"
-              ]
+              $avg: ["$Cleanliness", "$Maintenance", "$Convenience", "$Timing"],
             },
-            TotalNumberOfRatings: 1
-          }
-        }
+            TotalNumberOfRatings: 1,
+          },
+        },
       ]);
 
       return { reviews, rating };

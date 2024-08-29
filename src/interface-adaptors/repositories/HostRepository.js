@@ -130,7 +130,7 @@ export class HostRepository {
         },
       );
 
-      const addToTransactions = await HostTransactionModel.create({
+      await HostTransactionModel.create({
         balanceAfterCommission: balanceAfterCommission,
         commissionToAdmin: commissionToAdmin,
         hostId: hostId,
@@ -141,7 +141,8 @@ export class HostRepository {
         paymentMethod: paymentMethod,
         credited: true,
       });
-      const addToBookings = await VehicleBookingModel.create({
+
+      await VehicleBookingModel.create({
         balanceAfterCommission: balanceAfterCommission,
         commissionToAdmin: commissionToAdmin,
         hostId: hostId,
@@ -153,6 +154,24 @@ export class HostRepository {
         bookingStarts: tripStarts,
         bookingEnds: tripEnds,
       });
+
+      if (paymentMethod === "wallet") {
+        await UserWalletModel.findOneAndUpdate(
+          { userId },
+          {
+            $inc: { balance: -totalAmount },
+          },
+        );
+
+        await UserTransactionModel.create({
+          paymentId: paymentId,
+          amount: totalAmount,
+          paymentMessage: `Booked a vehicle`,
+          paymentMethod: "wallet",
+          userId: userId,
+          credited: false,
+        });
+      }
 
       return addToWallet;
     } catch (error) {
@@ -528,56 +547,57 @@ export class HostRepository {
     try {
       let aggregationPipeline = [];
 
-    if (filter === "monthly") {
-      // Aggregate monthly sales
-      aggregationPipeline = [
-        {
-          $match: { bookingStatus: true, hostId }, // Add a match stage to filter by orderStatus
-        },
-        {
-          $group: {
-            _id: {
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
+      if (filter === "monthly") {
+        // Aggregate monthly sales
+        aggregationPipeline = [
+          {
+            $match: { bookingStatus: true, hostId }, // Add a match stage to filter by orderStatus
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" },
+              },
+              totalSales: { $sum: 1 },
             },
-            totalSales: { $sum: 1 },
           },
-        },
-      ];
-    } else if (filter === "yearly") {
-      // Aggregate yearly sales
-      aggregationPipeline = [
-        {
-          $match: { bookingStatus: true }, // Add a match stage to filter by orderStatus
-        },
-        {
-          $group: {
-            _id: { $year: "$createdAt" },
-            totalSales: { $sum: 1 },
+        ];
+      } else if (filter === "yearly") {
+        // Aggregate yearly sales
+        aggregationPipeline = [
+          {
+            $match: { bookingStatus: true }, // Add a match stage to filter by orderStatus
           },
-        },
-      ];
-    } else {
-      // Handle other filters if needed
-    }
+          {
+            $group: {
+              _id: { $year: "$createdAt" },
+              totalSales: { $sum: 1 },
+            },
+          },
+        ];
+      } else {
+        // Handle other filters if needed
+      }
 
-    const salesData = await VehicleBookingModel.aggregate(aggregationPipeline);
+      const salesData =
+        await VehicleBookingModel.aggregate(aggregationPipeline);
 
-    // Format data for the chart
-    const formattedData = {
-      labels: salesData.map((entry) =>
-        filter === "monthly"
-          ? moment(`${entry._id.year}-${entry._id.month}`, "YYYY-MM").format(
-              "MMMM YYYY",
-            )
-          : entry._id.toString(),
-      ),
-      data: salesData.map((entry) => entry.totalSales),
-    };
+      // Format data for the chart
+      const formattedData = {
+        labels: salesData.map((entry) =>
+          filter === "monthly"
+            ? moment(`${entry._id.year}-${entry._id.month}`, "YYYY-MM").format(
+                "MMMM YYYY",
+              )
+            : entry._id.toString(),
+        ),
+        data: salesData.map((entry) => entry.totalSales),
+      };
 
-    return formattedData;
+      return formattedData;
     } catch (error) {
-       console.log(error.message);
+      console.log(error.message);
       throw error;
     }
   }
@@ -586,7 +606,7 @@ export class HostRepository {
     try {
       return await HostModel.findById(hostId);
     } catch (error) {
-       console.log(error.message);
+      console.log(error.message);
       throw error;
     }
   }
@@ -594,7 +614,8 @@ export class HostRepository {
   async updateHost(hostId, fullname, email, phone) {
     try {
       const findHost = await HostModel.findById(hostId);
-      if (!findHost) throw new Error("host not found : updateHost - HostRepository");
+      if (!findHost)
+        throw new Error("host not found : updateHost - HostRepository");
 
       findHost.fullname = fullname;
       findHost.email = email;
@@ -603,7 +624,7 @@ export class HostRepository {
       findHost.save();
       return findHost;
     } catch (error) {
-       console.log(error.message);
+      console.log(error.message);
       throw error;
     }
   }
@@ -611,14 +632,17 @@ export class HostRepository {
   async updateHostProfileImage(hostId, profileImage) {
     try {
       const findHost = await HostModel.findById(hostId);
-      if (!findHost) throw new Error("host not found : updateHostProfileImage - HostRepository");
+      if (!findHost)
+        throw new Error(
+          "host not found : updateHostProfileImage - HostRepository",
+        );
 
       findHost.profileImage = profileImage;
 
       findHost.save();
       return findHost;
     } catch (error) {
-       console.log(error.message);
+      console.log(error.message);
       throw error;
     }
   }
