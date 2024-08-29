@@ -271,6 +271,27 @@ router.get("/chart-data/:filter", adminProtectRoute, verifyRole("admin"), (req, 
   adminController.getChartData(req, res);
 });
 
+router.get("/bookings", adminProtectRoute, verifyRole("admin"), (req, res) => {
+  const useCase = new AdminUseCase(adminRepository);
+  const adminController = new AdminController(useCase);
+
+  adminController.getBookings(req, res);
+});
+
+router.get("/booking-details/:paymentId", adminProtectRoute, verifyRole("admin"), (req, res) => {
+  const useCase = new AdminUseCase(adminRepository);
+  const adminController = new AdminController(useCase);
+
+  adminController.getBookingDetails(req, res);
+});
+
+router.post("/cancel-booking", adminProtectRoute, verifyRole("admin"), (req, res) => {
+  const useCase = new AdminUseCase(adminRepository);
+  const adminController = new AdminController(useCase);
+
+  adminController.cancelBooking(req, res);
+});
+
 router.post("/refresh-token", (req, res) =>
   adminController.adminRefreshToken(req, res)
 );

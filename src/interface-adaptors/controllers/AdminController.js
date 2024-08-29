@@ -86,4 +86,48 @@ export class AdminController {
             res.status(400).json({ error: error.message });
         }
     }
+
+    async getBookings(req, res) {
+        const adminId = req.admin._id;
+        try {
+            const bookings = await this.adminUseCase.getBookings();
+            console.log("admin fetched today's bookings");
+            res.status(200).json(bookings);
+        } catch (error) {
+            console.log(error.message);
+            res.status(400).json({ error: error.message });
+        }
+    }
+
+    async getBookingDetails(req, res) {
+        const { paymentId } = req.params;
+        try {
+            const bookings = await this.adminUseCase.getBookingDetails(paymentId);
+            console.log("admin fetched booking details of", paymentId);
+            res.status(200).json(bookings);
+        } catch (error) {
+            console.log(error.message);
+            res.status(400).json({ error: error.message });
+        }
+    }
+
+    async cancelBooking(req, res) {
+        const adminId = req.admin._id;
+        const { paymentId, cancelReason } = req.body;
+        try {
+            const bookings = await this.adminUseCase.cancelBooking(paymentId, cancelReason, adminId);
+            console.log("admin cancelled booking of ", paymentId);
+            const receiverId = await getReceiverSocketId(bookings?.paidBy);
+
+            if (receiverId) {
+                io.to(receiverId).emit("notify", cancelReason);
+                console.log("booking cancel notification send to user", receiverId);
+            }
+            res.status(200).json(bookings);
+        } catch (error) {
+            console.log(error.message);
+            res.status(400).json({ error: error.message });
+        }
+    }
+
 }

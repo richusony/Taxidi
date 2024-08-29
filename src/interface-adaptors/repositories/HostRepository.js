@@ -9,6 +9,11 @@ import HostRequestModel from "../../frameworks-and-drivers/database/mongoose/mod
 import UserNotification from "../../frameworks-and-drivers/database/mongoose/models/UserNotificationModel.js";
 import HostTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/HostPaymentHistory.js";
 import VehicleBookingModel from "../../frameworks-and-drivers/database/mongoose/models/VehicleBookingModel.js";
+import { generatePaymentIdString } from "../../utils/helper.js";
+import UserWalletModel from "../../frameworks-and-drivers/database/mongoose/models/UserWallet.js";
+import UserTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/UserPaymentHistory.js";
+import AdminWalletModel from "../../frameworks-and-drivers/database/mongoose/models/AdminWallet.js";
+import AdminTransactionModel from "../../frameworks-and-drivers/database/mongoose/models/AdminPaymentHistory.js";
 
 export class HostRepository {
   async saveHost(host) {
@@ -230,6 +235,7 @@ export class HostRepository {
   }
 
   async cancelBookingByHost(paymentId, cancelReason) {
+    const adminId = "668b183d01b691981bcaa102";
     try {
       const findBooking = await VehicleBookingModel.findOne({ paymentId });
       if (!findBooking) throw new Error("No Booking Found on this Payment Id", paymentId);
@@ -239,6 +245,58 @@ export class HostRepository {
       findBooking.bookingCancelReason = cancelReason;
       findBooking.bookingStatus = false;
       const booking = await findBooking.save();
+
+      await UserWalletModel.findOneAndUpdate({ userId: findBooking.paidBy }, {
+        $inc: { balance: findBooking.totalAmount }
+      });
+
+      let payId = await generatePaymentIdString("pay_", 8);
+
+      await UserTransactionModel.create({
+        paymentId: payId,
+        amount: findBooking.totalAmount,
+        paymentMessage: "Refund from cancelled booking",
+        paymentMethod: "wallet",
+        userId: findBooking.paidBy,
+        credited: true
+      });
+
+      await AdminWalletModel.findOneAndUpdate({ adminId }, {
+        $inc: { balance: -findBooking.commissionToAdmin }
+      });
+
+      payId = await generatePaymentIdString("pay_", 8);
+
+      await AdminTransactionModel.create({
+        adminId: adminId,
+        balanceAfterCommission: findBooking.balanceAfterCommission,
+        commissionToAdmin: findBooking.commissionToAdmin,
+        hostId: findBooking.hostId,
+        paidBy: findBooking.paidBy,
+        totalAmount: findBooking.totalAmount,
+        paymentId: payId,
+        vehicleId: vehicleId,
+        paymentMethod: "wallet",
+        credited: false
+      });
+
+      await HostWalletModel.findOneAndUpdate({ hostId: findBooking.hostId }, {
+        $inc: { balance: -findBooking.balanceAfterCommission }
+      });
+
+      payId = await generatePaymentIdString("pay_", 8);
+
+      await HostTransactionModel.create({
+        balanceAfterCommission: findBooking.balanceAfterCommission,
+        commissionToAdmin: findBooking.commissionToAdmin,
+        hostId: findBooking.hostId,
+        paidBy: findBooking.paidBy,
+        totalAmount: findBooking.totalAmount,
+        paymentId: payId,
+        vehicleId: findBooking.vehicleId,
+        paymentMethod: "wallet",
+        credited: false,
+      });
 
       await UserNotification.create({
         context: cancelReason,
