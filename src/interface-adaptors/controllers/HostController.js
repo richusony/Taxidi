@@ -580,4 +580,43 @@ export default class HostController {
       res.status(400).json({ error: error.message });
     }
   }
+
+  async getProfile(req, res) {
+    const hostId = req.hostDetails._id;
+    try {
+      const data = await this.hostUseCase.getProfile(hostId);
+      res.status(200).json(data);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async updateHost(req, res) {
+    const hostId = req.hostDetails._id;
+    const {fullname, email, phone} = req.body;
+
+    try {
+      const data = await this.hostUseCase.updateHost(hostId, fullname.trim(), email.trim(), phone);
+      res.status(200).json(data);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  async updateHostProfileImage(req, res) {
+    const hostId = req.hostDetails._id;
+    const profileImage = req?.file?.path;
+
+    if(!profileImage) return res.status(400).json({error: "problem with getting profile Image url"});
+
+    try {
+      const data = await this.hostUseCase.updateHostProfileImage(hostId, profileImage);
+      res.status(200).json(data);
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  }
 }

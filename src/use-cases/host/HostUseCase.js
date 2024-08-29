@@ -79,6 +79,18 @@ export class HostUseCase {
     }
 
     async getChartData(filter, hostId) {
-        return await this.hostRepository.getChartData(filter, hostId)
+        return await this.hostRepository.getChartData(filter, hostId);
+    }
+
+    async getProfile(hostId) {
+        return await this.hostRepository.getProfile(hostId);
+    }
+
+    async updateHost(hostId, fullname, email, phone) {
+        return await this.hostRepository.updateHost(hostId, fullname, email, phone);
+    }
+
+    async updateHostProfileImage(hostId, profileImage) {
+        return await this.hostRepository.updateHostProfileImage(hostId, profileImage);
     }
 }

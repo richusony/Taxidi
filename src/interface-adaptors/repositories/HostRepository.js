@@ -525,7 +525,8 @@ export class HostRepository {
 
   // Function to get sales data based on the filter (implement as needed)
   async getChartData(filter, hostId) {
-    let aggregationPipeline = [];
+    try {
+      let aggregationPipeline = [];
 
     if (filter === "monthly") {
       // Aggregate monthly sales
@@ -575,5 +576,50 @@ export class HostRepository {
     };
 
     return formattedData;
+    } catch (error) {
+       console.log(error.message);
+      throw error;
+    }
+  }
+
+  async getProfile(hostId) {
+    try {
+      return await HostModel.findById(hostId);
+    } catch (error) {
+       console.log(error.message);
+      throw error;
+    }
+  }
+
+  async updateHost(hostId, fullname, email, phone) {
+    try {
+      const findHost = await HostModel.findById(hostId);
+      if (!findHost) throw new Error("host not found : updateHost - HostRepository");
+
+      findHost.fullname = fullname;
+      findHost.email = email;
+      findHost.phone = phone;
+
+      findHost.save();
+      return findHost;
+    } catch (error) {
+       console.log(error.message);
+      throw error;
+    }
+  }
+
+  async updateHostProfileImage(hostId, profileImage) {
+    try {
+      const findHost = await HostModel.findById(hostId);
+      if (!findHost) throw new Error("host not found : updateHostProfileImage - HostRepository");
+
+      findHost.profileImage = profileImage;
+
+      findHost.save();
+      return findHost;
+    } catch (error) {
+       console.log(error.message);
+      throw error;
+    }
   }
 }

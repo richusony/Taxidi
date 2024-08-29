@@ -1,6 +1,7 @@
 import express from "express";
 import { verifyRole } from "../middlewares/verifyRole.js";
 import { hostParser } from "../../external-lib/multer.js";
+import { hostProfileParse } from "../../external-lib/multer.js";
 import { HostLogin } from "../../../use-cases/host/HostLogin.js";
 import { HostUseCase } from "../../../use-cases/host/HostUseCase.js";
 import hostProtectedRoute from "../middlewares/hostProtectedRoute.js";
@@ -75,29 +76,44 @@ router.get("/bookings", hostProtectedRoute, verifyRole("host"), (req, res) => {
   const hostUseCase = new HostUseCase(hostRepository);
   const hostController = new HostController(hostUseCase);
 
-  hostController.getAllBookings(req,res);
+  hostController.getAllBookings(req, res);
 });
 
-router.get("/booking-history", hostProtectedRoute, verifyRole("host"), (req, res) => {
-  const hostUseCase = new HostUseCase(hostRepository);
-  const hostController = new HostController(hostUseCase);
+router.get(
+  "/booking-history",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const hostUseCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(hostUseCase);
 
-  hostController.getTodayBookings(req,res);
-});
+    hostController.getTodayBookings(req, res);
+  },
+);
 
-router.get("/booking-details/:paymentId", hostProtectedRoute, verifyRole("host"), (req, res) => {
-  const hostUseCase = new HostUseCase(hostRepository);
-  const hostController = new HostController(hostUseCase);
+router.get(
+  "/booking-details/:paymentId",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const hostUseCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(hostUseCase);
 
-  hostController.getBookingDetails(req,res);
-});
+    hostController.getBookingDetails(req, res);
+  },
+);
 
-router.post("/cancel-booking", hostProtectedRoute, verifyRole("host"), (req, res) => {
-  const hostUseCase = new HostUseCase(hostRepository);
-  const hostController = new HostController(hostUseCase);
+router.post(
+  "/cancel-booking",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const hostUseCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(hostUseCase);
 
-  hostController.cancelBooking(req, res);
-});
+    hostController.cancelBooking(req, res);
+  },
+);
 
 router.get("/wallet", hostProtectedRoute, verifyRole("host"), (req, res) => {
   const hostUseCase = new HostUseCase(hostRepository);
@@ -106,47 +122,77 @@ router.get("/wallet", hostProtectedRoute, verifyRole("host"), (req, res) => {
   hostController.getWalletInfo(req, res);
 });
 
-router.get("/wallet-history", hostProtectedRoute, verifyRole("host"), (req, res) => {
-  const hostUseCase = new HostUseCase(hostRepository);
-  const hostController = new HostController(hostUseCase);
+router.get(
+  "/wallet-history",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const hostUseCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(hostUseCase);
 
-  hostController.getWalletHistory(req, res);
-});
+    hostController.getWalletHistory(req, res);
+  },
+);
 
-router.post("/send-message", hostProtectedRoute, verifyRole("host"), (req, res) => {
-  const hostUseCase = new Messages(hostRepository);
-  const hostController = new HostController(hostUseCase);
+router.post(
+  "/send-message",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const hostUseCase = new Messages(hostRepository);
+    const hostController = new HostController(hostUseCase);
 
-  hostController.sendMessageToAdmin(req, res);
-});
+    hostController.sendMessageToAdmin(req, res);
+  },
+);
 
-router.get("/get-messages", hostProtectedRoute, verifyRole("host"), (req, res) => {
-  const hostUseCase = new Messages(hostRepository);
-  const hostController = new HostController(hostUseCase);
+router.get(
+  "/get-messages",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const hostUseCase = new Messages(hostRepository);
+    const hostController = new HostController(hostUseCase);
 
-  hostController.getAdminMessages(req, res);
-});
+    hostController.getAdminMessages(req, res);
+  },
+);
 
-router.patch("/update-vehicle", hostProtectedRoute, verifyRole("host"), (req, res) => {
-  const useCase = new HostUseCase(hostRepository);
-  const hostController = new HostController(useCase);
+router.patch(
+  "/update-vehicle",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const useCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(useCase);
 
-  hostController.updateVehilce(req, res);
-});
+    hostController.updateVehilce(req, res);
+  },
+);
 
-router.patch("/list/:vehicleId", hostProtectedRoute, verifyRole("host"), (req, res) => {
-  const useCase = new HostUseCase(hostRepository);
-  const hostController = new HostController(useCase);
+router.patch(
+  "/list/:vehicleId",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const useCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(useCase);
 
-  hostController.listVehicle(req, res);
-});
+    hostController.listVehicle(req, res);
+  },
+);
 
-router.patch("/unlist/:vehicleId", hostProtectedRoute, verifyRole("host"), (req, res) => {
-  const useCase = new HostUseCase(hostRepository);
-  const hostController = new HostController(useCase);
+router.patch(
+  "/unlist/:vehicleId",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const useCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(useCase);
 
-  hostController.unListVehicle(req, res);
-});
+    hostController.unListVehicle(req, res);
+  },
+);
 
 router.get("/counts", hostProtectedRoute, verifyRole("host"), (req, res) => {
   const useCase = new HostUseCase(hostRepository);
@@ -155,12 +201,49 @@ router.get("/counts", hostProtectedRoute, verifyRole("host"), (req, res) => {
   hostController.getCounts(req, res);
 });
 
-router.get("/chart-data/:filter", hostProtectedRoute, verifyRole("host"), (req,res) => {
+router.get(
+  "/chart-data/:filter",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const useCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(useCase);
+
+    hostController.getChartData(req, res);
+  },
+);
+
+router.get("/profile", hostProtectedRoute, verifyRole("host"), (req, res) => {
   const useCase = new HostUseCase(hostRepository);
   const hostController = new HostController(useCase);
 
-  hostController.getChartData(req, res);
+  hostController.getProfile(req, res);
 });
+
+router.patch(
+  "/update-host",
+  hostProtectedRoute,
+  verifyRole("host"),
+  (req, res) => {
+    const useCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(useCase);
+
+    hostController.updateHost(req, res);
+  },
+);
+
+router.patch(
+  "/update-host-image",
+  hostProtectedRoute,
+  verifyRole("host"),
+  hostProfileParse.single("profileImage"),
+  (req, res) => {
+    const useCase = new HostUseCase(hostRepository);
+    const hostController = new HostController(useCase);
+
+    hostController.updateHostProfileImage(req, res);
+  },
+);
 
 router.post("/refresh-token", (req, res) => {
   const hostUseCase = new HostLogin(hostRepository);

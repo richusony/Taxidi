@@ -44,6 +44,10 @@ const hostSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
     },
+    profileImage: {
+      type: String,
+      default: "https://t4.ftcdn.net/jpg/04/83/90/87/360_F_483908736_1HvJO1XjPHsvjeWJWANspi7i0tN0pYrP.jpg"
+    }
   },
   { timestamps: true },
 );
