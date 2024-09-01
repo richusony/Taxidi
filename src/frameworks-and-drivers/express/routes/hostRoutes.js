@@ -79,7 +79,7 @@ router.get("/bookings", hostProtectedRoute, verifyRole("host"), (req, res) => {
   const hostUseCase = new HostUseCase(hostRepository);
   const hostController = new HostController(hostUseCase);
 
-  hostController.getAllBookings(req, res);
+  hostController.getTodayBookings(req, res);
 });
 
 router.get(
@@ -90,7 +90,7 @@ router.get(
     const hostUseCase = new HostUseCase(hostRepository);
     const hostController = new HostController(hostUseCase);
 
-    hostController.getTodayBookings(req, res);
+    hostController.getAllBookings(req, res);
   },
 );
 

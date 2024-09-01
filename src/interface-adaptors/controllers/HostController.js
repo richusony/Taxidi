@@ -83,9 +83,27 @@ export default class HostController {
     return urls;
   }
   async getAllHostRequests(req, res) {
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+    
+    const paginatedData = {};
     try {
       const allRequests = await this.hostUseCase.getAllHostRequests();
-      res.status(200).json(allRequests);
+      if (lastIndex < allRequests.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+      
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList= allRequests.length;
+      paginatedData.pageCount = Math.ceil(allRequests.length / limit);
+
+      paginatedData.result = allRequests.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -188,13 +206,31 @@ export default class HostController {
       await sendHostRejectionMail(email, rejectMsg);
       console.log(error.message);
       res.status(400).json({ error: error.message });
-    } catch (error) {}
+    } catch (error) { }
   }
 
   async getAllHosts(req, res) {
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+
+    const paginatedData = {};
     try {
       const hosts = await this.hostUseCase.getAllHosts();
-      res.status(200).json(hosts);
+      if (lastIndex < hosts.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList = hosts.length;
+      paginatedData.pageCount = Math.ceil(hosts.length / limit);
+
+      paginatedData.result = hosts.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
@@ -237,12 +273,28 @@ export default class HostController {
   }
 
   async getHostVehicles(req, res) {
-    // console.log("reached controller");
     const hostId = req?.hostDetails?._id;
-    // console.log(req?);
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+    
+    const paginatedData = {};
     try {
       const vehicles = await this.hostUseCase.getHostVehicles(hostId);
-      res.status(200).json(vehicles);
+      if (lastIndex < vehicles.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+      
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList= vehicles.length;
+      paginatedData.pageCount = Math.ceil(vehicles.length / limit);
+
+      paginatedData.result = vehicles.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
@@ -355,16 +407,29 @@ export default class HostController {
   async getTodayBookings(req, res) {
     const hostId = req.hostDetails._id;
     const hostName = req.hostDetails.fullname;
-    const { limit, skip } = req.query;
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+    
+    const paginatedData = {};
     try {
-      const bookings = await this.hostUseCase.getTodayBookings(
-        hostId,
-        limit,
-        skip,
-      );
+      const bookings = await this.hostUseCase.getTodayBookings(hostId);
       // console.log(bookings);
       console.log("fetched all bookings of host:", hostName);
-      res.status(200).json(bookings);
+      if (lastIndex < bookings.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+      
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList= bookings.length;
+      paginatedData.pageCount = Math.ceil(bookings.length / limit);
+
+      paginatedData.result = bookings.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
@@ -374,16 +439,30 @@ export default class HostController {
   async getAllBookings(req, res) {
     const hostId = req.hostDetails._id;
     const hostName = req.hostDetails.fullname;
-    const { limit, skip } = req.query;
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+    
+    const paginatedData = {};
+
     try {
-      const bookings = await this.hostUseCase.getAllBookings(
-        hostId,
-        limit,
-        skip,
-      );
+      const bookings = await this.hostUseCase.getAllBookings(hostId);
       // console.log(bookings);
       console.log("fetched all bookings of host:", hostName);
-      res.status(200).json(bookings);
+      if (lastIndex < bookings.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+      
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList= bookings.length;
+      paginatedData.pageCount = Math.ceil(bookings.length / limit);
+
+      paginatedData.result = bookings.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
@@ -440,16 +519,29 @@ export default class HostController {
 
   async getWalletHistory(req, res) {
     const hostId = req.hostDetails._id;
-    const { limit, skip } = req.query;
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+    
+    const paginatedData = {};
 
     try {
-      const history = await this.hostUseCase.getWalletHistory(
-        hostId,
-        limit,
-        skip,
-      );
+      const history = await this.hostUseCase.getWalletHistory(hostId);
       console.log("fetched host wallet history by", hostId);
-      res.status(200).json(history);
+      if (lastIndex < history.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+      
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList= history.length;
+      paginatedData.pageCount = Math.ceil(history.length / limit);
+
+      paginatedData.result = history.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });

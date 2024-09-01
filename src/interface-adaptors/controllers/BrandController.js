@@ -20,9 +20,27 @@ export class BrandController {
   }
 
   async getAllBrands(req, res) {
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+    
+    const paginatedData = {};
     try {
       const brands = await this.brandUseCase.getBrands();
-      res.status(200).json(brands);
+      if (lastIndex < brands.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+      
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList= brands.length;
+      paginatedData.pageCount = Math.ceil(brands.length / limit);
+
+      paginatedData.result = brands.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
