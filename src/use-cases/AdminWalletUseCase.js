@@ -7,7 +7,7 @@ export class AdminWalletUseCase {
         return await this.repository.getWalletInfo(adminId);
     }
 
-    async getWalletHistory(adminId,limit, skip) {
-        return await this.repository.getWalletHistory(adminId, limit, skip);
+    async getWalletHistory(adminId) {
+        return await this.repository.getWalletHistory(adminId);
     }
 }

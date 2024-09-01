@@ -113,14 +113,9 @@ export class AdminRepository {
     }
   }
 
-  async getWalletHistory(adminId, limit, skip) {
-    const limitItems = parseInt(limit);
-    const skipItems = parseInt(skip);
-
+  async getWalletHistory(adminId) {
     try {
       return await AdminTransactionModel.find({ adminId })
-        .skip(skipItems)
-        .limit(limitItems)
         .sort({ createdAt: -1 });
     } catch (error) {
       console.log(error);
@@ -207,8 +202,8 @@ export class AdminRepository {
         labels: salesData.map((entry) =>
           filter === "monthly"
             ? moment(`${entry._id.year}-${entry._id.month}`, "YYYY-MM").format(
-                "MMMM YYYY",
-              )
+              "MMMM YYYY",
+            )
             : entry._id.toString(),
         ),
         data: salesData.map((entry) => entry.totalSales),
@@ -221,9 +216,7 @@ export class AdminRepository {
     }
   }
 
-  async getBookings(limit, skip) {
-    const limitItems = parseInt(limit);
-    const skipItems = parseInt(skip);
+  async getBookings() {
 
     const date = new Date();
 
@@ -241,8 +234,6 @@ export class AdminRepository {
         },
       })
         .populate(["paidBy", "hostId", "vehicleId"])
-        .skip(skipItems)
-        .limit(limitItems)
         .sort({ createdAt: -1 });
     } catch (error) {
       console.log(error);
@@ -250,14 +241,10 @@ export class AdminRepository {
     }
   }
 
-  async getBookingHistory(limit, skip) {
-    const limitItems = parseInt(limit);
-    const skipItems = parseInt(skip);
+  async getBookingHistory() {
     try {
       return await VehicleBookingModel.find({})
         .populate(["paidBy", "hostId", "vehicleId"])
-        .skip(skipItems)
-        .limit(limitItems)
         .sort({ createdAt: -1 });
     } catch (error) {
       console.log(error);

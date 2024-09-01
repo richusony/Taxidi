@@ -112,9 +112,27 @@ export class UserController {
   }
 
   async getAllLicenseVerifyRequest(req, res) {
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+
+    const paginatedData = {};
     try {
       const allRequest = await this.userUseCase.getAllLicenseVerifyRequest();
-      res.status(200).json(allRequest);
+      if (lastIndex < allRequest.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList = allRequest.length;
+      paginatedData.pageCount = Math.ceil(allRequest.length / limit);
+
+      paginatedData.result = allRequest.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -229,7 +247,7 @@ export class UserController {
   async bookingUsingWallet(req, res) {
     const userId = req.user._id;
     const { amount, vehicleId, queryStartDate, queryEndDate } = req.body;
-    const paymentId = await generatePaymentIdString("pay_",8);
+    const paymentId = await generatePaymentIdString("pay_", 8);
     const paymentMethod = "wallet";
     const amt = parseFloat(amount) * 100;
 
@@ -381,10 +399,28 @@ export class UserController {
 
   async getAllBookings(req, res) {
     const userId = req.user._id;
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+
+    const paginatedData = {};
     try {
       const bookings = await this.userUseCase.getAllBookings(userId);
       console.log("fetched bookings...");
-      res.status(200).json(bookings);
+      if (lastIndex < bookings.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList = bookings.length;
+      paginatedData.pageCount = Math.ceil(bookings.length / limit);
+
+      paginatedData.result = bookings.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       console.log(error.message);
       res.status(400).status({ error: error.message });
@@ -427,12 +463,28 @@ export class UserController {
 
   async getWalletHistory(req, res) {
     const userId = req.user._id;
-    const { limit, skip } = req.query;
-    // console.log(req.query);
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+
+    const paginatedData = {};
     try {
-      const walletHistory = await this.userUseCase.getWalletHistory(userId, limit, skip);
+      const walletHistory = await this.userUseCase.getWalletHistory(userId);
       console.log("fetched user wallet History of", userId);
-      res.status(200).json(walletHistory);
+      if (lastIndex < walletHistory.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList = walletHistory.length;
+      paginatedData.pageCount = Math.ceil(walletHistory.length / limit);
+
+      paginatedData.result = walletHistory.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       console.log(error.message);
       res.status(400).status({ error: error.message });

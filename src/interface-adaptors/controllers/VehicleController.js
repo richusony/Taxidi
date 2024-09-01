@@ -79,9 +79,28 @@ export class VehicleController {
   }
 
   async getAllCars(req, res) {
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+    
+    const paginatedData = {};
+    
     try {
       const cars = await this.vehicleUseCase.getVehicles();
-      res.status(200).json(cars);
+      if (lastIndex < cars.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+      
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList= cars.length;
+      paginatedData.pageCount = Math.ceil(cars.length / limit);
+
+      paginatedData.result = cars.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }

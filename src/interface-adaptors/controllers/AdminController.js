@@ -52,16 +52,29 @@ export class AdminController {
 
   async getWalletHistory(req, res) {
     const adminId = req.admin._id;
-    const { limit, skip } = req.query;
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+    
+    const paginatedData = {};
 
     try {
-      const walletHistory = await this.adminUseCase.getWalletHistory(
-        adminId,
-        limit,
-        skip,
-      );
+      const walletHistory = await this.adminUseCase.getWalletHistory(adminId);
       console.log("fetched admin wallet history", adminId);
-      res.status(200).json(walletHistory);
+      if (lastIndex < walletHistory.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+      
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList= walletHistory.length;
+      paginatedData.pageCount = Math.ceil(walletHistory.length / limit);
+
+      paginatedData.result = walletHistory.slice(startIndex, lastIndex);
+      res.status(200).json(paginatedData);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
@@ -104,11 +117,30 @@ export class AdminController {
   }
 
   async getBookingHistory(req, res) {
-    const { limit, skip } = req.query;
+    const page = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
+
+    const startIndex = (page - 1) * limit;
+    const lastIndex = (page) * limit;
+    
+    const paginatedData = {};
+    
     try {
-      const bookings = await this.adminUseCase.getBookingHistory(limit, skip);
+      const bookings = await this.adminUseCase.getBookingHistory();
+      
+      if (lastIndex < bookings.length) {
+        paginatedData.next = { page: page + 1 }
+      }
+      
+      if (startIndex > 0) {
+        paginatedData.prev = { page: page - 1 }
+      }
+      paginatedData.totalList= bookings.length;
+      paginatedData.pageCount = Math.ceil(bookings.length / limit);
+
+      paginatedData.result = bookings.slice(startIndex, lastIndex);
       console.log("admin fetched booking history");
-      res.status(200).json(bookings);
+      res.status(200).json(paginatedData);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });

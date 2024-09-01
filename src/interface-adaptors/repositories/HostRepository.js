@@ -196,7 +196,7 @@ export class HostRepository {
     }
   }
 
-  async getBookingDetails(paymentId, limit, skip) {
+  async getBookingDetails(paymentId) {
     try {
       // return await VehicleBookingModel.findOne({ paymentId }).populate(["hostId", "vehicleId"]);
       return await VehicleBookingModel.aggregate([
@@ -235,9 +235,7 @@ export class HostRepository {
     }
   }
 
-  async getTodayBookings(hostId, limit, skip) {
-    const limitItems = parseInt(limit);
-    const skipItems = parseInt(skip);
+  async getTodayBookings(hostId) {
     const date = new Date();
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0); // Set time to the start of the day
@@ -271,11 +269,7 @@ export class HostRepository {
             foreignField: "_id",
             as: "vehicleDetails",
           },
-        },
-        {
-          $skip: skipItems,
-        },
-        { $limit: limitItems },
+        }
       ]);
     } catch (error) {
       console.log(error.message);
@@ -283,10 +277,8 @@ export class HostRepository {
     }
   }
 
-  async getAllBookings(hostId, limit, skip) {
-    const limitItems = parseInt(limit);
-    const skipItems = parseInt(skip);
-    try {
+  async getAllBookings(hostId) {
+   try {
       return await VehicleBookingModel.aggregate([
         { $match: { hostId } },
         { $sort: { createdAt: -1 } },
@@ -305,11 +297,7 @@ export class HostRepository {
             foreignField: "_id",
             as: "vehicleDetails",
           },
-        },
-        {
-          $skip: skipItems,
-        },
-        { $limit: limitItems },
+        }
       ]);
     } catch (error) {
       console.log(error.message);
@@ -413,13 +401,9 @@ export class HostRepository {
     }
   }
 
-  async getWalletHistory(hostId, limit, skip) {
-    const limitItems = parseInt(limit);
-    const skipItems = parseInt(skip);
+  async getWalletHistory(hostId) {
     try {
       return await HostTransactionModel.find({ hostId })
-        .skip(skipItems)
-        .limit(limitItems)
         .sort({ createdAt: -1 });
     } catch (error) {
       console.log(error.message);

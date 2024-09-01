@@ -11,12 +11,12 @@ export class AdminUseCase {
     return await this.repository.getChartData(filter);
   }
 
-  async getBookings(limit, skip) {
-    return await this.repository.getBookings(limit, skip);
+  async getBookings() {
+    return await this.repository.getBookings();
   }
 
-  async getBookingHistory(limit, skip) {
-    return await this.repository.getBookingHistory(limit, skip);
+  async getBookingHistory() {
+    return await this.repository.getBookingHistory();
   }
 
   async getBookingDetails(paymentId) {

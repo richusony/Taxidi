@@ -181,15 +181,9 @@ export class UserRepository {
     }
   }
 
-  async getWalletHistory(userId, limit, skip) {
+  async getWalletHistory(userId) {
     try {
-      const limitItems = parseInt(limit);
-      const skipItems = parseInt(skip);
-      return await UserTransactionModel.find({
-        userId
-      })
-        .skip(skipItems)
-        .limit(limitItems)
+      return await UserTransactionModel.find({ userId })
         .sort({ createdAt: -1 });
     } catch (error) {
       console.log(error.message);
