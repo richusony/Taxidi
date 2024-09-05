@@ -401,13 +401,14 @@ export class UserController {
     const userId = req.user._id;
     const page = parseInt(req.query.skip);
     const limit = parseInt(req.query.limit);
+    const filterCancelled = req.query.cancelled;
 
     const startIndex = (page - 1) * limit;
     const lastIndex = (page) * limit;
 
     const paginatedData = {};
     try {
-      const bookings = await this.userUseCase.getAllBookings(userId);
+      const bookings = await this.userUseCase.getAllBookings(userId, filterCancelled);
       console.log("fetched bookings...");
       if (lastIndex < bookings.length) {
         paginatedData.next = { page: page + 1 }

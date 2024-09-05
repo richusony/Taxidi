@@ -33,8 +33,8 @@ export class UserUseCase {
         return await this.repository.getCarDetails(vehicleRegistrationNumber);
     }
 
-    async getAllBookings(userId) {
-        return await this.repository.getAllUserBookings(userId);
+    async getAllBookings(userId, filterCancel) {
+        return await this.repository.getAllUserBookings(userId, filterCancel);
     }
 
     async getBookingDetails(paymentId) {

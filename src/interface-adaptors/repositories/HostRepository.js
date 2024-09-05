@@ -185,11 +185,20 @@ export class HostRepository {
     }
   }
 
-  async getAllUserBookings(userId) {
+  async getAllUserBookings(userId, filterCancel) {
     try {
-      return await VehicleBookingModel.find({ paidBy: userId })
-        .sort({ createdAt: -1 })
-        .populate(["hostId", "vehicleId"]);
+      if (filterCancel) {
+        return await VehicleBookingModel.find({
+          paidBy: userId,
+          bookingStatus: filterCancel,
+        })
+          .sort({ createdAt: -1 })
+          .populate(["hostId", "vehicleId"]);
+      } else {
+        return await VehicleBookingModel.find({ paidBy: userId })
+          .sort({ createdAt: -1 })
+          .populate(["hostId", "vehicleId"]);
+      }
     } catch (error) {
       console.log(error.message);
       throw error;
@@ -269,7 +278,7 @@ export class HostRepository {
             foreignField: "_id",
             as: "vehicleDetails",
           },
-        }
+        },
       ]);
     } catch (error) {
       console.log(error.message);
@@ -278,7 +287,7 @@ export class HostRepository {
   }
 
   async getAllBookings(hostId) {
-   try {
+    try {
       return await VehicleBookingModel.aggregate([
         { $match: { hostId } },
         { $sort: { createdAt: -1 } },
@@ -297,7 +306,7 @@ export class HostRepository {
             foreignField: "_id",
             as: "vehicleDetails",
           },
-        }
+        },
       ]);
     } catch (error) {
       console.log(error.message);
@@ -403,8 +412,9 @@ export class HostRepository {
 
   async getWalletHistory(hostId) {
     try {
-      return await HostTransactionModel.find({ hostId })
-        .sort({ createdAt: -1 });
+      return await HostTransactionModel.find({ hostId }).sort({
+        createdAt: -1,
+      });
     } catch (error) {
       console.log(error.message);
       throw error;
@@ -466,8 +476,8 @@ export class HostRepository {
           locationText,
           location: {
             type: "Point",
-            coordinates: [longitude, latitude]
-          }
+            coordinates: [longitude, latitude],
+          },
         },
       );
     } catch (error) {
