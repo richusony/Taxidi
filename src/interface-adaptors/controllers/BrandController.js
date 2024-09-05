@@ -9,9 +9,12 @@ export class BrandController {
 
     // res.send("working")
     // console.log(req.body);
-    
+
     try {
-      const brand = await this.brandUseCase.execute(brandName.toUpperCase(), brandImage);
+      const brand = await this.brandUseCase.execute(
+        brandName.toUpperCase(),
+        brandImage,
+      );
       res.status(201).json(brand);
     } catch (error) {
       console.log(error.message);
@@ -24,23 +27,27 @@ export class BrandController {
     const limit = parseInt(req.query.limit);
 
     const startIndex = (page - 1) * limit;
-    const lastIndex = (page) * limit;
-    
+    const lastIndex = page * limit;
+
     const paginatedData = {};
     try {
       const brands = await this.brandUseCase.getBrands();
-      if (lastIndex < brands.length) {
-        paginatedData.next = { page: page + 1 }
-      }
-      
-      if (startIndex > 0) {
-        paginatedData.prev = { page: page - 1 }
-      }
-      paginatedData.totalList= brands.length;
-      paginatedData.pageCount = Math.ceil(brands.length / limit);
+      if (page !== 0 && limit !== 0) {
+        if (lastIndex < brands.length) {
+          paginatedData.next = { page: page + 1 };
+        }
 
-      paginatedData.result = brands.slice(startIndex, lastIndex);
-      res.status(200).json(paginatedData);
+        if (startIndex > 0) {
+          paginatedData.prev = { page: page - 1 };
+        }
+        paginatedData.totalList = brands.length;
+        paginatedData.pageCount = Math.ceil(brands.length / limit);
+
+        paginatedData.result = brands.slice(startIndex, lastIndex);
+        res.status(200).json(paginatedData);
+      }else {
+        res.status(200).json(brands);
+      }
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -53,7 +60,7 @@ export class BrandController {
       const updateBrand = await this.brandUseCase.updateBrand(
         brandName,
         brandId,
-        brandImage
+        brandImage,
       );
       res.status(200).json(updateBrand);
     } catch (error) {
