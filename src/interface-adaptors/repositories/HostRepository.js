@@ -37,6 +37,16 @@ export class HostRepository {
   }
 
   async saveHostRequest(host) {
+    const vehicleExist = await VehicleModel.findOne({
+      vehicleRegistrationNumber: host.registrationNumber,
+    });
+    if (vehicleExist) throw new Error("Vehicle already exists");
+
+    const requestExists = await HostRequestModel.findOne({
+      vehicleRegistrationNumber: host.registrationNumber,
+    });
+    if (requestExists) throw new Error("Request for this vehicle already exists");
+
     const hostRequestModel = new HostRequestModel({
       fullname: host.fullname,
       email: host.email,

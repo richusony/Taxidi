@@ -67,11 +67,9 @@ const vehicleSchema = new mongoose.Schema(
       type: {
         type: String,
         enum: ["Point"], // 'location.type' must be 'Point'
-        required: true,
       },
       coordinates: {
         type: [Number],
-        required: true,
         // [longitude, latitude]
       },
     },
@@ -83,7 +81,7 @@ const vehicleSchema = new mongoose.Schema(
     },
     availabilityStatus: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   { timestamps: true }

@@ -72,7 +72,7 @@ export default class HostController {
         pollutionCertificateImage,
         vehicleImages,
       );
-      res.status(200).json(hostRequest);
+      res.status(201).json(hostRequest);
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
@@ -185,6 +185,8 @@ export default class HostController {
         insuranceCertificateImage,
         pollutionCertificateImage,
         rent,
+        null,
+        null
       );
       await sendHostApprovalMail(email, hostPassword);
       const deleteRequest = await this.hostUseCase.deleteHostRequest(
