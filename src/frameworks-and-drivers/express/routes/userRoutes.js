@@ -233,4 +233,9 @@ router.post("/refresh-token", (req, res) =>
 router.get("/logout", protectRoute, verifyRole("user"), (req, res) => {
   loginController.logout(req, res);
 });
+
+router.get("/keep-alive", (req, res) => {
+  res.status(200).json({message: "Taxidi: server re-activated"})
+});
+
 export default router;
