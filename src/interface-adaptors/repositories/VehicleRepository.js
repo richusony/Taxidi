@@ -169,7 +169,6 @@ export class VehicleRepository {
         .limit(parseInt(limit))
         .skip(parseInt(skip))
         .exec();
-      console.log("response :", availableCars);
       return availableCars;
     } catch (error) {
       console.error("Error fetching available cars:", error);

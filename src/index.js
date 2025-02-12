@@ -13,6 +13,8 @@ import { connectMongoDB } from "./frameworks-and-drivers/database/mongoose/conne
 // const app = express();
 const PORT = process.env.PORT || 8080;
 const MONGODB_URI = process.env.MONGODB_URI;
+console.clear();
+console.log(MONGODB_URI);
 
 connectMongoDB(MONGODB_URI);
 
